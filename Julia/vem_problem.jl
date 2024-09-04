@@ -2,9 +2,9 @@ module vem_problem
 
 using SparseArrays
 
-export vem_problem, Mesh
+export VEMProblem, Mesh
 
-struct vem_problem
+struct VEMProblem
     # Add fields as per your problem's structure
 end
 
