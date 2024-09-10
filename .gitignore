@@ -1,4 +1,4 @@
-
+.DS_Store
 .venv
 
 
@@ -9,7 +9,9 @@ Python_Code/
 
 PolyMesher
 
-# Repo
+# Repos
 654dad3306b9f8db53c37266/
 LightningVEM/
 NA45/
+Veamy/
+VEM3D/
