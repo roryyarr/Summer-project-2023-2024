@@ -21,6 +21,7 @@ Plot an interpolated heatmap over a mesh structure with optional cell boundaries
 - solution::Vector{Float64}: A vector containing the solution values (e.g., temperature, potential) for each vertex.
 
 # Keyword Arguments
+- ptitle: A string specifying the plot title.
 - colourscheme: A symbol representing the color scheme to use for the heatmap. Default is :blues, but can be any valid color scheme (e.g., :viridis, :plasma).
 - show_colorbar::Bool: A boolean flag that determines whether the color bar is shown. Default is true (color bar shown). Set to false to hide the color bar.
 - `savepath`: A string specifying the file path to save the plot. If not provided, the plot will be displayed instead.
@@ -29,19 +30,20 @@ Plot an interpolated heatmap over a mesh structure with optional cell boundaries
 - The function will plot the heatmap by interpolating the solution values over the mesh.
 - It fills each element (polygon/triangle) in the mesh with interpolated colors, using the specified color scheme.
 - The x and y axis limits are automatically set based on the mesh vertices.
+- If `ptitle` is provided it adds the string as the title. Otherwise no title will be displayed.
 - The color bar can be toggled on or off using the show_colorbar argument.
 - If `savepath` is provided, the plot will be saved to the specified file path. Otherwise, the plot will be displayed interactively.
 
-
+```julia
 # Using the default 'blues' color scheme and showing the color bar
-plot_heatmap!(mesh, solution)
-
+plot_heatmap(mesh, solution)
+```
+```julia
 # Using the 'plasma' color scheme and hiding the color bar
-plot_heatmap!(mesh, solution; colourscheme=:plasma, show_colorbar=false, savepath = "heatmap_plot.png")
+plot_heatmap(mesh, solution; colourscheme=:plasma, show_colorbar=false, savepath = "heatmap_plot.png")
+```
 """
-
-# Function to plot the interpolated heatmap with overlaid cell boundaries, equal aspect ratio, automatic axis limits, color scheme option, and optional color bar
-function plot_heatmap(mesh::Mesh, solution::Vector{Float64}; colourscheme=:blues, show_colourbar=true, savepath=nothing)
+function plot_heatmap(mesh::Mesh, solution::Vector{Float64}; ptitle =nothing, axis_labels = nothing, colourscheme=:blues, show_colourbar=true, savepath=nothing)
     # Extract the vertices and solution values
     x_coords = [v[1] for v in mesh.vertices]
     y_coords = [v[2] for v in mesh.vertices]
@@ -68,9 +70,13 @@ function plot_heatmap(mesh::Mesh, solution::Vector{Float64}; colourscheme=:blues
     end
 
     # Final plot customization
-    xlabel!(p, "X")
-    ylabel!(p, "Y")
-    title!(p, "Interpolated Heatmap with Mesh Cells")
+    if axis_labels !== nothing
+        xlabel!(p, axis_labels[1])
+        ylabel!(p, axis_labels[2])
+    end
+    if ptitle !== nothing
+        title!(p, ptitle)
+    end
 
 
     # Save the plot if savepath is provided, otherwise display it
@@ -92,6 +98,7 @@ Plot a 3D wireframe of a mesh with either a solid color or a color scheme based 
 - `heights::Vector{Float64}`: A vector containing the heights (z-coordinates) of each vertex.
   
 # Keyword Arguments
+- If `ptitle` is provided it adds the string as the title. Otherwise no title will be displayed.
 - `azimuth::Float64`: The azimuth angle (horizontal rotation) for viewing the 3D plot. Default is `30`.
 - `elevation::Float64`: The elevation angle (vertical rotation) for viewing the 3D plot. Default is `30`.
 - `solidcolour`: A solid color for the wireframe (e.g., `:red`, `:blue`). If provided, it overrides the color scheme.
@@ -99,18 +106,22 @@ Plot a 3D wireframe of a mesh with either a solid color or a color scheme based 
 - `savepath`: A string specifying the file path to save the plot. If not provided, the plot will be displayed instead.
 
 # Behavior
+- Creates wireframe.
+- Assigns ptitle as plot title.
 - If `solidcolour` is provided, all wireframe lines will be plotted with this solid color.
 - If `colourscheme` is provided and `solidcolour` is `nothing`, the wireframe will be colored based on vertex heights using the color scheme.
 - If `savepath` is provided, the plot will be saved to the specified file path. Otherwise, the plot will be displayed interactively.
 
+```julia
 # Using a color scheme and saving the plot
-plot_wireframe(mesh, heights, azimuth=45, elevation=60, colourscheme=:plasma, savepath="mesh_plot.png")
-
+plot_wireframe(mesh, heights, ptitle = azimuth=45, elevation=60, colourscheme=:plasma, savepath="mesh_plot.png")
+```
+```julia
 # Using a solid color and displaying the plot
 plot_wireframe(mesh, heights, azimuth=45, elevation=60, solidcolour=:green)
+```
 """
-# Function to plot the wireframe with color based on height and specified viewing angle and color scheme
-function plot_wireframe(mesh::Mesh, heights::Vector{Float64}; azimuth=30, elevation=30, solidcolour=nothing, colourscheme=:viridis, savepath=nothing)
+function plot_wireframe(mesh::Mesh, heights::Vector{Float64}; ptitle=nothing, azimuth=30, elevation=30, solidcolour=nothing, colourscheme=:viridis, savepath=nothing)
     # Extract vertices coordinates
     x_coords = [v[1] for v in mesh.vertices]
     y_coords = [v[2] for v in mesh.vertices]
@@ -121,8 +132,11 @@ function plot_wireframe(mesh::Mesh, heights::Vector{Float64}; azimuth=30, elevat
     norm_heights = (heights .- min_h) ./ (max_h - min_h)
 
     # Initialize 3D plot with camera position
-    fig = plot3d(title="Wireframe Mesh (Colored by Height)", legend=false, camera=(azimuth, elevation))
-
+    if ptitle !== nothing
+        fig = plot3d(title=ptitle, legend=false, camera=(azimuth, elevation))
+    else
+        fig = plot3d(legend=false, camera=(azimuth, elevation))
+    end
     # Loop through each element and plot the wireframe
     for element in mesh.elements
         # Get the x, y, and z coordinates for the current element
@@ -158,7 +172,6 @@ function plot_wireframe(mesh::Mesh, heights::Vector{Float64}; azimuth=30, elevat
         display(fig)
     end
 end
-
 
 
 end
