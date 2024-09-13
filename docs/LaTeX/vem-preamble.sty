@@ -1,0 +1,64 @@
+% preamble-tex.sty - Preamble file for VEM Summer Project
+
+% Required packages
+\usepackage{graphicx}       % For inserting images
+\usepackage{amsmath}        % Advanced math typesetting
+\usepackage{amssymb}        % Additional math symbols
+\usepackage{xcolor}         % Color management
+
+% TikZ and PGFPlots for graphs
+\usepackage{pgfplots}       % For creating plots and graphs
+\usetikzlibrary{angles, quotes, calc, shapes.geometric, shapes}  % TikZ libraries for shapes, angles, etc.
+\usepackage{wasysym}        % For additional symbols
+\usepackage{tikz}           % TikZ drawing package
+
+% Multi-column layout
+\usepackage{multicol}
+
+% Import and standalone for subfiles
+\usepackage{import}
+\usepackage{standalone}
+
+% Code highlighting packages
+\usepackage{matlab-prettifier}  % MATLAB syntax highlighting
+\usepackage{jlcode}             % Julia syntax highlighting
+
+% Custom environment for MATLAB code
+\newenvironment{matlabcode}
+{%
+  \let\lstlisting\relax               % Temporarily disable existing lstlisting definition
+  \let\endlstlisting\relax            % Also disable the end of lstlisting
+  \usepackage{matlab-prettifier}      % Re-enable matlab-prettifier package
+  \lstset{style=Matlab-editor}        % Set MATLAB-prettifier style
+  \renewcommand\lstlistingname{Matlab}% Rename lstlisting for MATLAB block
+  \begin{lstlisting}
+}
+{\end{lstlisting}}
+
+% Custom environment for Julia code
+\newenvironment{juliacode}
+{%
+  \let\lstlisting\relax               % Temporarily disable existing lstlisting definition
+  \let\endlstlisting\relax            % Also disable the end of lstlisting
+  \usepackage{jlcode}                 % Re-enable jlcode package
+  \lstset{language=Julia}             % Set Julia language style
+  \renewcommand\lstlistingname{Julia} % Rename lstlisting for Julia block
+  \begin{lstlisting}
+}
+{\end{lstlisting}}
+
+% Geometry for page layout
+\usepackage{geometry}
+\geometry{ % Sets margin and paper size
+  a4paper,
+  total={170mm,257mm},
+  left=27mm,
+  right=30mm,
+  top=25mm
+}
+
+% Set tocdepth to 2 (include sections and subsections)
+\setcounter{tocdepth}{2}
+
+% Subfiles package for modular documents
+\usepackage{subfiles}  % Best loaded last in the preamble
