@@ -12,13 +12,20 @@
 
 \tableofcontents
 
+\section{Abstract}
+
+
+
 \section{Introduction}
 
+This paper discusses the Virtual Element Method(VEM) as a numerical scheme for solving the Poisson problem. It is a mimetic 
+
 \subsection{Poisson problem}
-\begin{align*}
-    -\Delta{u} & = f \quad  \text{in}\ \ \Omega \\
-    u & = 0 \quad  \text{on}\ \delta\Omega
-\end{align*}
+Let $\Omega \subset \mathbb{R}^n$ be a
+\begin{align}
+    -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
+    u &= 0 \quad \text{on } \partial \Omega, \label{eq:dirichlet}
+\end{align}
 
 Where $\Omega \subset \mathbb{R}^n, f \in L^2(\Omega)$ %and $g \in H^{1/2}(\partial\Omega).$
 
@@ -42,15 +49,16 @@ Where $(\cdot,\cdot)_{0,E}$ is the $L^2$ inner product.
 \subsection{Ritz projection}
 Define the operator $\Pi^E: V_h^E \rightarrow \mathcal{P}_E$,
 \begin{enumerate}
-    \item $(\nabla(\Pi^Ev_h-v_h),\nabla p)_{0,E} = 0 \hspace{5pt} \forall p \in \mathcal{P_E}$
+    \item $(\nabla (\Pi^E v_h - v_h), \nabla p)_{0,E} = 0 \quad \forall p \in \mathcal{P}_k(E)$
     \item $\overline{\Pi^Ev_h} = \overline{v_h}$
 \end{enumerate}
 
 \begin{align*}
-(\nabla\Pi^E_h,\nabla p)_{0,E} &= (\nabla v_h,\nabla p)\\
-&= \sum_{e\in \delta E}\int_e v_hn_e\cdot\nabla pds 
-&= \sum_{e\in \delta E} v_hn_e\cdot pds 
+(\nabla \Pi^E v_h, \nabla p)_{0,E} &= (\nabla v_h, \nabla p)_{0,E} \\
+&= \sum_{e \in \partial E} \int_e v_h n_e \cdot \nabla p \, ds \\
+&= \sum_{e \in \partial E} \int_e v_h n_e \cdot p \, ds
 \end{align*}
+
 
 $$P_0v_h = \cfrac{1}{|E_k|}\int_{E_k}v_h$$
 
@@ -58,7 +66,9 @@ $\Pi^Ev_h = \sum_{i=1}^{N_k}s^im_i$
 
 \subsection{Basis functions}
 Introduce $\{\varphi_i\}^N_{i=1} \in V_h$ as the basis of an element space. This can be computed using Lagrangian polynomial between two points.\\
-I.e., $\phi_i = \cfrac{(x_i-x)(y_i-y)}{(x_{i+1}-x_i)(y_{i+1}-y_i)}$
+I.e., $\phi_i = \cfrac{(x_i-x)(y_i-y)}{(x_{i+1}-x_i)(y_{i+1}-y_i)}$\\
+
+$\phi_i(x, y) = l_i(x) m_i(y)$
 
 
 
@@ -113,163 +123,163 @@ $B_E := \begin{bmatrix}
 \end{equation}
 
 
-\section{Example}
-\input{diagram}
+% \section{Example}
+% \input{diagram}
 
-$$E_1 = \begin{cases}
-    V_1 = (\frac{1}{2},\sqrt{3}) \\
-    V_2 = (\frac{3}{2},\sqrt{3}) \\
-    V_3 = (\frac{3}{2},1+\sqrt{3}) \\ 
-    V_4 = (\frac{1}{2},1+\sqrt{3}) \\
-\end{cases}
-\quad
-E_2 = \begin{cases}
-    V_1 = (\frac{1}{2},0) \\ 
-    V_2 = (\frac{3}{2},0) \\ 
-    V_3 = (2,\frac{\sqrt{3}}{2}) \\
-    V_4 = (\frac{3}{2},\sqrt{3}) \\
-    V_5 = (\frac{1}{2}, \sqrt{3}) \\ 
-    V_6 = (0, \frac{\sqrt{3}}{2}) \\
-\end{cases}$$\\
+% $$E_1 = \begin{cases}
+%     V_1 = (\frac{1}{2},\sqrt{3}) \\
+%     V_2 = (\frac{3}{2},\sqrt{3}) \\
+%     V_3 = (\frac{3}{2},1+\sqrt{3}) \\ 
+%     V_4 = (\frac{1}{2},1+\sqrt{3}) \\
+% \end{cases}
+% \quad
+% E_2 = \begin{cases}
+%     V_1 = (\frac{1}{2},0) \\ 
+%     V_2 = (\frac{3}{2},0) \\ 
+%     V_3 = (2,\frac{\sqrt{3}}{2}) \\
+%     V_4 = (\frac{3}{2},\sqrt{3}) \\
+%     V_5 = (\frac{1}{2}, \sqrt{3}) \\ 
+%     V_6 = (0, \frac{\sqrt{3}}{2}) \\
+% \end{cases}$$\\
 
-\subsection{E$_1$}
-For $E_1$ the square the coordinates of the centriod are, $x_{E_1} = (1, \frac{1}{2}+\sqrt{3}).$ The diameter is, $ h_{E_1} = \sqrt{2}$ and the area is $|E_1| = 1$.\\
+% \subsection{E$_1$}
+% For $E_1$ the square the coordinates of the centriod are, $x_{E_1} = (1, \frac{1}{2}+\sqrt{3}).$ The diameter is, $ h_{E_1} = \sqrt{2}$ and the area is $|E_1| = 1$.\\
 
-\subsubsection{Momonial basis}
-$
-m_1^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = 1\\
-m_x^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{1}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = \cfrac{x - 1}{\sqrt{2}}\\
-m_y^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{1} = \cfrac{y - \frac{1}{2} - \sqrt{3}}{\sqrt{2}}$\\
-
-
-\subsubsection{DOF}
-
-\(
-\begin{array}{ll}
-m_x^1\bigg|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2} - 1}{\sqrt{2}} = -\cfrac{1}{\sqrt{2}} & \qquad m_y^1\bigg|_{y=\sqrt{3}} = \cfrac{\sqrt{3} - \frac{1}{2} - \sqrt{3}}{\sqrt{2}} = -\cfrac{1}{\sqrt{2}} \\
-m_x^1\bigg|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2} - 1}{\sqrt{2}} = \cfrac{1}{\sqrt{2}} & \qquad m_y^1\bigg|_{y=\sqrt{3}+1} = \cfrac{1+\sqrt{3} - \frac{1}{2} - \sqrt{3}}{\sqrt{2}} = \cfrac{1}{\sqrt{2}}
-\end{array}
-\)
-
-\subsubsection{D$_1$ Matrix}
-$D_1 = \cfrac{1}{\sqrt{2}}\begin{pmatrix}
-    \sqrt{2} & -1 & -1\\
-    \sqrt{2} & 1 & -1\\
-    \sqrt{2} & 1 & 1\\
-    \sqrt{2} & -1 & 1\\
-\end{pmatrix}$
-
-\subsubsection{Gradient of m}
-$\nabla m_1^1 = (0,0)$\\
-$\nabla m_x^1 = (\frac{1}{\sqrt{2}},0)$ \\
-$\nabla m_y^1 = (0,\frac{1}{\sqrt{2}})$ 
-
-\subsubsection{Lagrangian $\mathbf{\phi}$ basis}
-$\phi_1 = \cfrac{(x_2-x)(y_4-y)}{(x_2-x_1)(y_4-y_1)}$\\
-$\phi_1 = \cfrac{(\frac{3}{2} - x)(1+\sqrt{3} + y)}{(\frac{3}{2}-\frac{1}{2})(1+\sqrt{3} - \sqrt{3})}$\\
-Note the denominator is 1 and the same is true for the rest so they can be written in the following form.\\
-$\phi_1 = (\frac{3}{2} - x)(1 + \sqrt{3} - y)$\\
-$\phi_2 = (x - \frac{1}{2})(1 + \sqrt{3} - y)$\\
-$\phi_3 = (x - \frac{1}{2} )(y - \sqrt{3})$\\
-$\phi_4 = (\frac{3}{2} - x)(y - \sqrt{3})$
-
-\subsubsection{$P_0\varphi_i$}
-$
-P_0\varphi_0 = \iint_E(\frac{3}{2} - x)(1+\sqrt{3}-y)dxdy \\
-\hspace*{22pt}= \int_{\frac{1}{2}}^{\frac{3}{2}}(\frac{3}{2} - x)dx \int_{\sqrt{3}}^{1+\sqrt{3}}(1+\sqrt{3}-y)dy\\
-\hspace*{22pt}= \frac{1}{4}[3x-x^2]_{\frac{1}{2}}^{\frac{3}{2}}[2(1+\sqrt{3})x - x^2]_{\sqrt{3}}^{1+\sqrt{3}}\\
-\hspace*{22pt}= \frac{1}{4}(9/2-9/4 - 3/2+1/4)(2(1+\sqrt{3})(1+\sqrt{3})\\
-\hspace*{22pt}= \frac{1}{4}(1)(1)$
+% \subsubsection{Momonial basis}
+% $
+% m_1^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = 1\\
+% m_x^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{1}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = \cfrac{x - 1}{\sqrt{2}}\\
+% m_y^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{1} = \cfrac{y - \frac{1}{2} - \sqrt{3}}{\sqrt{2}}$\\
 
 
+% \subsubsection{DOF}
 
-\subsubsection{Gradient of $\phi$}
-$\nabla\phi_1 = \left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right)$\\
-$\nabla\phi_2 = \left(1 + \sqrt{3} - y,-(x - \frac{1}{2})\right)$\\
-$\nabla\phi_3 = \left(y - \sqrt{3},x - \frac{1}{2}\right)$\\
-$\nabla\phi_4 = \left(-(y-\sqrt{3}),\frac{3}{2}-x\right)$\\
+% \(
+% \begin{array}{ll}
+% m_x^1\bigg|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2} - 1}{\sqrt{2}} = -\cfrac{1}{\sqrt{2}} & \qquad m_y^1\bigg|_{y=\sqrt{3}} = \cfrac{\sqrt{3} - \frac{1}{2} - \sqrt{3}}{\sqrt{2}} = -\cfrac{1}{\sqrt{2}} \\
+% m_x^1\bigg|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2} - 1}{\sqrt{2}} = \cfrac{1}{\sqrt{2}} & \qquad m_y^1\bigg|_{y=\sqrt{3}+1} = \cfrac{1+\sqrt{3} - \frac{1}{2} - \sqrt{3}}{\sqrt{2}} = \cfrac{1}{\sqrt{2}}
+% \end{array}
+% \)
 
-\subsubsection{$(\nabla m_x,\nabla\phi)$}
-$(\nabla m_x^1,\nabla\phi_1)_{E_1} = 
-\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
--\frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
--\frac{1}{\sqrt{2}}$\\
-$(\nabla m_x^1,\nabla\phi_2)_{E_1} = 
-\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
-\frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
-\frac{1}{\sqrt{2}}$\\
-$(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
-\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
-\frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
--\frac{1}{\sqrt{2}}$\\
-$(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
-\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
--\frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
-\frac{1}{\sqrt{2}}$\\
+% \subsubsection{D$_1$ Matrix}
+% $D_1 = \cfrac{1}{\sqrt{2}}\begin{pmatrix}
+%     \sqrt{2} & -1 & -1\\
+%     \sqrt{2} & 1 & -1\\
+%     \sqrt{2} & 1 & 1\\
+%     \sqrt{2} & -1 & 1\\
+% \end{pmatrix}$
+
+% \subsubsection{Gradient of m}
+% $\nabla m_1^1 = (0,0)$\\
+% $\nabla m_x^1 = (\frac{1}{\sqrt{2}},0)$ \\
+% $\nabla m_y^1 = (0,\frac{1}{\sqrt{2}})$ 
+
+% \subsubsection{Lagrangian $\mathbf{\phi}$ basis}
+% $\phi_1 = \cfrac{(x_2-x)(y_4-y)}{(x_2-x_1)(y_4-y_1)}$\\
+% $\phi_1 = \cfrac{(\frac{3}{2} - x)(1+\sqrt{3} + y)}{(\frac{3}{2}-\frac{1}{2})(1+\sqrt{3} - \sqrt{3})}$\\
+% Note the denominator is 1 and the same is true for the rest so they can be written in the following form.\\
+% $\phi_1 = (\frac{3}{2} - x)(1 + \sqrt{3} - y)$\\
+% $\phi_2 = (x - \frac{1}{2})(1 + \sqrt{3} - y)$\\
+% $\phi_3 = (x - \frac{1}{2} )(y - \sqrt{3})$\\
+% $\phi_4 = (\frac{3}{2} - x)(y - \sqrt{3})$
+
+% \subsubsection{$P_0\varphi_i$}
+% $
+% P_0\varphi_0 = \iint_E(\frac{3}{2} - x)(1+\sqrt{3}-y)dxdy \\
+% \hspace*{22pt}= \int_{\frac{1}{2}}^{\frac{3}{2}}(\frac{3}{2} - x)dx \int_{\sqrt{3}}^{1+\sqrt{3}}(1+\sqrt{3}-y)dy\\
+% \hspace*{22pt}= \frac{1}{4}[3x-x^2]_{\frac{1}{2}}^{\frac{3}{2}}[2(1+\sqrt{3})x - x^2]_{\sqrt{3}}^{1+\sqrt{3}}\\
+% \hspace*{22pt}= \frac{1}{4}(9/2-9/4 - 3/2+1/4)(2(1+\sqrt{3})(1+\sqrt{3})\\
+% \hspace*{22pt}= \frac{1}{4}(1)(1)$
 
 
-\subsubsection{$\mathbf{(\nabla m_y,\nabla\phi)}$}
-$(\nabla m_y^1,\nabla\phi_1)_{E_1} = 
-\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
--\frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
--\frac{1}{\sqrt{2}}$\\
-$(\nabla m_y^1,\nabla\phi_2)_{E_1} = 
-\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
--\frac{1}{\sqrt{2}}(x - \frac{1}{2})|_{x=\frac{3}{2}} = 
--\frac{1}{\sqrt{2}}$\\
-$(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
-\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
-\frac{1}{\sqrt{2}}(x-\frac{1}{2})|_{x=\frac{3}{2}} = 
-\frac{1}{\sqrt{2}}$\\
-$(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
-\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
-\frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
-\frac{1}{\sqrt{2}}$\\
 
-\subsubsection{B$_1$ Matrix}
-$B_1 = \frac{1}{4}\begin{pmatrix}
-    1 & 1 & 1 & 1 \\
-    -d & 1 & -1 & 1\\
-    -1 & -1 & 1 & 1 
-\end{pmatrix}$
+% \subsubsection{Gradient of $\phi$}
+% $\nabla\phi_1 = \left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right)$\\
+% $\nabla\phi_2 = \left(1 + \sqrt{3} - y,-(x - \frac{1}{2})\right)$\\
+% $\nabla\phi_3 = \left(y - \sqrt{3},x - \frac{1}{2}\right)$\\
+% $\nabla\phi_4 = \left(-(y-\sqrt{3}),\frac{3}{2}-x\right)$\\
 
-\subsubsection{G Matrix}
-$G_1 = \begin{pmatrix}
-    1
-\end{pmatrix}
-$
+% \subsubsection{$(\nabla m_x,\nabla\phi)$}
+% $(\nabla m_x^1,\nabla\phi_1)_{E_1} = 
+% \left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
+% -\frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
+% -\frac{1}{\sqrt{2}}$\\
+% $(\nabla m_x^1,\nabla\phi_2)_{E_1} = 
+% \left(\frac{1}{\sqrt{2}},0\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
+% \frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
+% \frac{1}{\sqrt{2}}$\\
+% $(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
+% \left(\frac{1}{\sqrt{2}},0\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
+% \frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
+% -\frac{1}{\sqrt{2}}$\\
+% $(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
+% \left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
+% -\frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
+% \frac{1}{\sqrt{2}}$\\
 
-\subsection{E$_2$}
-For $E_1$ the square the coordinates of the centriod are, $x_{E_2} = (1,1).$ The diameter is, $ h_{E_1} = 2$ and the area is $|E_1| = \frac{3\sqrt{3}}{2}$.\\
-\\
-For $m_1^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{0} = 1$\\
-For $m_x^2 = \left(\cfrac{x - 1}{2}\right)^{1}\left(\cfrac{y - 1}{2}\right)^{0} = \cfrac{(x-1)}{2}$\\
-For $m_y^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{1} = \cfrac{y-1}{2}$\\
 
-\subsubsection{Monimals}
-$\begin{array}{ll}
-m_x^2|_{x=0}\hspace{1.5pt} = \cfrac{0-1}{2} = -\frac{1}{2} &\qquad m_y^2|_{y=0} \hspace{7pt}= \cfrac{0-1}{2} = -\frac{1}{2} \\
-m_x^2|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2}-1}{2} = -\frac{1}{4} &\qquad m_y^2|_{y=\frac{\sqrt{3}}{2}} = \cfrac{\frac{\sqrt{3}}{2}-1}{2} = \frac{\sqrt{3}-2}{4} \\
-m_x^2|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2}-1}{2} = \frac{1}{4} &\qquad m_y^2|_{y=\sqrt{3}}\, = \cfrac{\sqrt{3}-1}{2} = \frac{\sqrt{3}-1}{2} \\
-m_x^2|_{x=2}\hspace{1.5pt} = \cfrac{2-1}{2} = \frac{1}{2} &
-\end{array}$
+% \subsubsection{$\mathbf{(\nabla m_y,\nabla\phi)}$}
+% $(\nabla m_y^1,\nabla\phi_1)_{E_1} = 
+% \left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
+% -\frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
+% -\frac{1}{\sqrt{2}}$\\
+% $(\nabla m_y^1,\nabla\phi_2)_{E_1} = 
+% \left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
+% -\frac{1}{\sqrt{2}}(x - \frac{1}{2})|_{x=\frac{3}{2}} = 
+% -\frac{1}{\sqrt{2}}$\\
+% $(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
+% \left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
+% \frac{1}{\sqrt{2}}(x-\frac{1}{2})|_{x=\frac{3}{2}} = 
+% \frac{1}{\sqrt{2}}$\\
+% $(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
+% \left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
+% \frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
+% \frac{1}{\sqrt{2}}$\\
 
-$D_2 = \cfrac{1}{4}\begin{pmatrix}
-    4 & -1 & - 2\\
-    4 & 1 & - 2\\
-    4 & 2 & \sqrt{3} - 2\\
-    4 & 1 & 2\sqrt{3} - 2\\
-    4 & -1 & 2\sqrt{2} - 2\\
-    4 & -2 & \sqrt{3} - 2\\
-\end{pmatrix}$
+% \subsubsection{B$_1$ Matrix}
+% $B_1 = \frac{1}{4}\begin{pmatrix}
+%     1 & 1 & 1 & 1 \\
+%     -d & 1 & -1 & 1\\
+%     -1 & -1 & 1 & 1 
+% \end{pmatrix}$
 
-\subsection{B matrix}
-$\nabla m_1^2 = (0,0)$\\
-$\nabla m_x^2 = (\frac{1}{2},0)$ \\
-$\nabla m_y^2 = (0,\frac{1}{2})$ \\
+% \subsubsection{G Matrix}
+% $G_1 = \begin{pmatrix}
+%     1
+% \end{pmatrix}
+% $
 
-Hence, \\
-$P_0m_1 = \int_E\frac{1}{E}$
+% \subsection{E$_2$}
+% For $E_1$ the square the coordinates of the centriod are, $x_{E_2} = (1,1).$ The diameter is, $ h_{E_1} = 2$ and the area is $|E_1| = \frac{3\sqrt{3}}{2}$.\\
+% \\
+% For $m_1^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{0} = 1$\\
+% For $m_x^2 = \left(\cfrac{x - 1}{2}\right)^{1}\left(\cfrac{y - 1}{2}\right)^{0} = \cfrac{(x-1)}{2}$\\
+% For $m_y^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{1} = \cfrac{y-1}{2}$\\
+
+% \subsubsection{Monimals}
+% $\begin{array}{ll}
+% m_x^2|_{x=0}\hspace{1.5pt} = \cfrac{0-1}{2} = -\frac{1}{2} &\qquad m_y^2|_{y=0} \hspace{7pt}= \cfrac{0-1}{2} = -\frac{1}{2} \\
+% m_x^2|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2}-1}{2} = -\frac{1}{4} &\qquad m_y^2|_{y=\frac{\sqrt{3}}{2}} = \cfrac{\frac{\sqrt{3}}{2}-1}{2} = \frac{\sqrt{3}-2}{4} \\
+% m_x^2|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2}-1}{2} = \frac{1}{4} &\qquad m_y^2|_{y=\sqrt{3}}\, = \cfrac{\sqrt{3}-1}{2} = \frac{\sqrt{3}-1}{2} \\
+% m_x^2|_{x=2}\hspace{1.5pt} = \cfrac{2-1}{2} = \frac{1}{2} &
+% \end{array}$
+
+% $D_2 = \cfrac{1}{4}\begin{pmatrix}
+%     4 & -1 & - 2\\
+%     4 & 1 & - 2\\
+%     4 & 2 & \sqrt{3} - 2\\
+%     4 & 1 & 2\sqrt{3} - 2\\
+%     4 & -1 & 2\sqrt{2} - 2\\
+%     4 & -2 & \sqrt{3} - 2\\
+% \end{pmatrix}$
+
+% \subsection{B matrix}
+% $\nabla m_1^2 = (0,0)$\\
+% $\nabla m_x^2 = (\frac{1}{2},0)$ \\
+% $\nabla m_y^2 = (0,\frac{1}{2})$ \\
+
+% Hence, \\
+% $P_0m_1 = \int_E\frac{1}{E}$
 
 \subsection{Mesh example.}
 The mesh is defined using 3 sets, Vertices, Elements and Boundary. The first is an array of coordinates for each node. The Vertices element set contains a vector for each element. With the index for each node in the element labeled anti-clockwise. The boundary is a vector containing the indices in an anticlockwise order.
@@ -277,6 +287,6 @@ The mesh is defined using 3 sets, Vertices, Elements and Boundary. The first is 
 
 
 % Include the appendix
-\include{appendix}
+%\include{appendix}
 
 \end{document}

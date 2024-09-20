@@ -1,0 +1,542 @@
+\documentclass[class=article, crop=false]{standalone}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\section{Introduction}
+
+Partial differential equations (PDEs) play a central role in modeling physical phenomena across various fields such as physics, engineering, and applied mathematics. Among these, the Poisson equation is one of the most fundamental and widely studied PDEs due to its simplicity and relevance in describing steady-state processes like heat distribution, electrostatics, and incompressible fluid flow.
+
+\subsection{The Poisson Problem}
+
+Let $\Omega \subset \mathbb{R}^n$ be a bounded domain with Lipschitz continuous boundary $\partial \Omega$. The classical Poisson problem seeks a function $u$ satisfying:
+
+\begin{align}
+    -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
+    u &= 0 \quad \text{on } \partial \Omega, \label{eq:dirichlet}
+\end{align}
+
+where $f \in L^2(\Omega)$ is a given source term, and $u$ is subject to homogeneous Dirichlet boundary conditions.
+
+\subsubsection{Variational Formulation}
+
+To solve \eqref{eq:poisson}--\eqref{eq:dirichlet}, we often employ the variational (weak) formulation. Multiplying \eqref{eq:poisson} by a test function $v \in H_0^1(\Omega)$ and integrating over $\Omega$, we have:
+
+\[
+\int_\Omega (-\Delta u) v \, dx = \int_\Omega f v \, dx.
+\]
+
+Applying Green's first identity and using the boundary condition $u = 0$ on $\partial \Omega$, the variational problem becomes:
+
+\begin{equation}
+\text{Find } u \in H_0^1(\Omega) \text{ such that } a(u, v) = (f, v) \quad \forall v \in H_0^1(\Omega), \label{eq:variational}
+\end{equation}
+
+where:
+
+\[
+a(u, v) = \int_\Omega \nabla u \cdot \nabla v \, dx, \quad (f, v) = \int_\Omega f v \, dx.
+\]
+
+\subsection{Historical Development of Numerical Methods}
+
+The numerical approximation of PDEs has a rich history, with the Finite Element Method (FEM) being one of the most prominent and widely used techniques. However, traditional FEM faces challenges when dealing with complex geometries or when higher-order continuity is required. This has led to the development of alternative methods, such as Mimetic Finite Difference (MFD) schemes and, more recently, the Virtual Element Method (VEM).
+
+\subsubsection{Finite Element Method (FEM)}
+
+The FEM was developed in the 1950s and 1960s, initially for structural mechanics and later extended to various areas of engineering and physics. The method involves discretizing the domain $\Omega$ into smaller subdomains (elements) and constructing local approximations of the solution using polynomial basis functions. The key features of FEM include:
+
+\begin{itemize}
+    \item \textbf{Mesh Generation}: Division of the domain into elements such as triangles (in 2D) or tetrahedra (in 3D).
+    \item \textbf{Basis Functions}: Use of piecewise polynomial functions (e.g., linear, quadratic) that are locally supported.
+    \item \textbf{Variational Approach}: Solving the weak formulation leads to a system of algebraic equations.
+\end{itemize}
+
+While FEM has been highly successful, it has limitations:
+
+\begin{itemize}
+    \item \textbf{Mesh Restrictions}: Standard FEM requires meshes conforming to specific shapes (e.g., triangles, quadrilaterals) and quality criteria.
+    \item \textbf{Handling Complex Geometries}: Generating high-quality meshes for complex geometries can be challenging and computationally expensive.
+    \item \textbf{Polynomials on Polygons}: Difficulty in constructing shape functions on arbitrary polygonal elements.
+\end{itemize}
+
+\subsubsection{Mimetic Finite Difference (MFD) Schemes}
+
+Mimetic methods emerged to address some of FEM's limitations by better capturing the underlying physical and mathematical properties of the PDEs at the discrete level. The term "mimetic" refers to the ability of the numerical scheme to mimic essential properties such as conservation laws, symmetries, and fundamental identities.
+
+Key aspects of MFD schemes include:
+
+\begin{itemize}
+    \item \textbf{Discrete Operators}: Construction of discrete divergence, gradient, and Laplacian operators that satisfy discrete analogs of continuous identities.
+    \item \textbf{General Meshes}: Ability to work on unstructured meshes with general polyhedral elements.
+    \item \textbf{Local Conservation}: Preservation of physical conservation laws at the discrete level.
+\end{itemize}
+
+Despite their advantages, MFD schemes can be complex to implement and may result in larger stencils, leading to increased computational cost.
+
+\subsubsection{Evolution to the Virtual Element Method (VEM)}
+
+The Virtual Element Method was introduced by Beir\~ao da Veiga et al. in 2013 \cite{beirao2013basic} as a generalization of the FEM and MFD schemes. VEM retains the flexibility of MFD in handling general polygonal/polyhedral meshes while maintaining the variational framework of FEM.
+
+The key motivations for developing VEM were:
+
+\begin{itemize}
+    \item \textbf{Flexibility in Mesh Design}: Allowing for arbitrary polygonal and polyhedral elements, which simplifies mesh generation for complex geometries.
+    \item \textbf{Polynomial Reproduction}: Ensuring that the method can exactly represent polynomials up to a certain degree, crucial for achieving optimal convergence rates.
+    \item \textbf{Avoidance of Explicit Basis Functions}: Bypassing the need to compute explicit forms of local basis functions within elements, which can be challenging for general polygons.
+\end{itemize}
+
+\paragraph{Core Ideas of VEM}
+
+VEM constructs function spaces that are similar to traditional finite element spaces but are "virtual" in the sense that the basis functions are not known explicitly inside the elements. Instead, the method relies on:
+
+\begin{itemize}
+    \item \textbf{Degrees of Freedom (DOFs)}: Carefully chosen so that functions are determined by their values on the element boundaries and certain integral properties.
+    \item \textbf{Projection Operators}: Used to approximate functions and their derivatives by computable quantities.
+    \item \textbf{Stabilization Terms}: Included to ensure stability and convergence of the method.
+\end{itemize}
+
+By combining these ideas, VEM achieves the following:
+
+\begin{itemize}
+    \item \textbf{General Mesh Compatibility}: Works seamlessly on meshes with elements of arbitrary shape.
+    \item \textbf{Computational Efficiency}: Avoids the need to perform numerical integration over complex shapes.
+    \item \textbf{Mathematical Robustness}: Provides optimal convergence rates and inherits the approximation properties of the underlying polynomial spaces.
+\end{itemize}
+
+\subsection{The Virtual Element Method for the Poisson Problem}
+
+Applying VEM to the Poisson problem involves several steps that mirror those in FEM but with adaptations to account for the virtual nature of the basis functions.
+
+\subsubsection{Virtual Element Space}
+
+Let $\mathcal{T}_h$ denote a tessellation of $\Omega$ into non-overlapping polygonal elements $E$. The global virtual element space $V_h$ is defined as:
+
+\[
+V_h = \{ v_h \in H_0^1(\Omega) \mid v_h|_E \in V_h^E, \ \forall E \in \mathcal{T}_h \},
+\]
+
+where each local space $V_h^E$ consists of functions that satisfy:
+
+\begin{enumerate}
+    \item \textbf{Polynomial Reproduction}: For each $E$, $\mathcal{P}_k(E) \subset V_h^E$, where $\mathcal{P}_k(E)$ denotes polynomials of degree $\leq k$.
+    \item \textbf{Conformity}: Functions are continuous across element boundaries.
+    \item \textbf{Computable DOFs}: DOFs are selected so that they can be computed using information available on the element boundaries.
+\end{enumerate}
+
+\subsubsection{Degrees of Freedom}
+
+For $k = 1$, which corresponds to the lowest-order VEM, the DOFs for a function $v_h \in V_h^E$ can be chosen as:
+
+\begin{itemize}
+    \item \textbf{Nodal Values}: The values of $v_h$ at the vertices of $E$.
+\end{itemize}
+
+This choice simplifies the implementation while still providing sufficient approximation power for many applications.
+
+\subsubsection{Variational Formulation in VEM}
+
+The discrete variational problem seeks $u_h \in V_h$ such that:
+
+\[
+a_h(u_h, v_h) = (f, v_h) \quad \forall v_h \in V_h,
+\]
+
+where the discrete bilinear form $a_h(\cdot, \cdot)$ approximates $a(\cdot, \cdot)$ and is defined element-wise:
+
+\[
+a_h(u_h, v_h) = \sum_{E \in \mathcal{T}_h} a_h^E(u_h, v_h).
+\]
+
+\paragraph{Local Bilinear Form}
+
+The local bilinear form $a_h^E(\cdot, \cdot)$ is constructed to satisfy:
+
+\begin{enumerate}
+    \item \textbf{Consistency}: For all $p \in \mathcal{P}_k(E)$ and $v_h \in V_h^E$,
+
+    \[
+    a_h^E(p, v_h) = a^E(p, v_h),
+    \]
+
+    where $a^E(p, v_h) = \int_E \nabla p \cdot \nabla v_h \, dx$.
+    \item \textbf{Stability}: There exists a constant $C > 0$ such that for all $v_h \in V_h^E$,
+
+    \[
+    C \| v_h \|_{H^1(E)}^2 \leq a_h^E(v_h, v_h) \leq C^{-1} \| v_h \|_{H^1(E)}^2.
+    \]
+\end{enumerate}
+
+\subsubsection{Computational Aspects}
+
+\paragraph{Projection Operators}
+
+A key component of VEM is the use of projection operators, particularly the \textbf{energy projection} $\Pi^E$ onto $\mathcal{P}_k(E)$. This operator is defined such that for $v_h \in V_h^E$:
+
+\[
+\int_E \nabla (v_h - \Pi^E v_h) \cdot \nabla p \, dx = 0 \quad \forall p \in \mathcal{P}_k(E),
+\]
+
+and ensures that $\Pi^E v_h$ captures the polynomial part of $v_h$'s gradient.
+
+\paragraph{Stiffness Matrix Assembly}
+
+The stiffness matrix for each element $E$ involves computing terms like $a_h^E(\varphi_i, \varphi_j)$, where $\{ \varphi_i \}$ are the basis functions corresponding to the DOFs. Since the explicit forms of $\varphi_i$ inside $E$ are not known, the method relies on:
+
+\begin{itemize}
+    \item Computing $\Pi^E \varphi_i$, which are polynomials and thus explicitly known.
+    \item Approximating the bilinear form using the projections and adding a stabilization term to account for the unknown components.
+\end{itemize}
+
+\subsection{Advantages of VEM}
+
+VEM offers several advantages over traditional methods:
+
+\begin{itemize}
+    \item \textbf{Mesh Flexibility}: Ability to use general polygonal meshes allows for greater flexibility in mesh generation, especially for complex geometries.
+    \item \textbf{Ease of Implementation}: For low-order methods, the implementation is relatively straightforward, with DOFs associated only with the element boundaries.
+    \item \textbf{High-Order Accuracy}: Capable of achieving high-order convergence rates by increasing the degree $k$ of polynomials in the virtual element space.
+    \item \textbf{Adaptivity}: Facilitates mesh adaptivity and refinement strategies without the stringent requirements of mesh conformity in FEM.
+\end{itemize}
+
+\subsection{Outline of the Report}
+
+In the subsequent sections, we will delve deeper into the formulation and implementation of VEM for the Poisson problem:
+
+\begin{itemize}
+    \item \textbf{Section 2}: Formal definition of the virtual element space and the construction of basis functions.
+    \item \textbf{Section 3}: Detailed description of the Ritz projection and the computation of the local stiffness matrix.
+    \item \textbf{Section 4}: Calculation of matrices required for assembling the global system.
+    \item \textbf{Section 5}: Example calculations illustrating the method on specific elements.
+    \item \textbf{Section 6}: Numerical results demonstrating the performance of VEM.
+    \item \textbf{Section 7}: Conclusions and perspectives on future work.
+\end{itemize}
+
+\subsection{Historical References}
+
+For readers interested in the development of VEM and related methods, we recommend the following key references:
+
+\begin{itemize}
+    \item Beir\~ao da Veiga et al. (2013) introduced VEM in \emph{Basic Principles of Virtual Element Methods} \cite{beirao2013basic}.
+    \item Beir\~ao da Veiga et al. (2014) provided a comprehensive analysis of VEM in \emph{The Hitchhiker's Guide to the Virtual Element Method} \cite{beirao2014hitchhiker}.
+    \item Brezzi et al. (2009) discussed mimetic finite differences in \emph{A Family of Mimetic Finite Difference Methods on Polygonal and Polyhedral Meshes for Second Order Elliptic Problems} \cite{brezzi2009family}.
+\end{itemize}
+
+\subsection{Conclusion}
+
+The Virtual Element Method represents a significant advancement in numerical methods for PDEs, offering a powerful and flexible framework that extends beyond the capabilities of traditional FEM. By embracing general meshes and circumventing the need for explicit basis functions within elements, VEM opens new avenues for solving complex problems in computational science and engineering.
+
+In the following sections, we will build upon this introduction to develop a comprehensive understanding of VEM, its theoretical foundations, and practical implementation for the Poisson problem.
+
+\begin{thebibliography}{9}
+
+\bibitem{beirao2013basic}
+L. Beir\~ao da Veiga, F. Brezzi, L. D. Marini, and A. Russo,
+\newblock \emph{The basic principles of virtual element methods},
+\newblock Mathematical Models and Methods in Applied Sciences, 23(01), 199--214, 2013.
+
+\bibitem{beirao2014hitchhiker}
+L. Beir\~ao da Veiga, F. Brezzi, A. Cangiani, G. Manzini, L. D. Marini, and A. Russo,
+\newblock \emph{Basic principles of virtual element methods},
+\newblock Mathematical Models and Methods in Applied Sciences, 23(01), 199--214, 2013.
+
+\bibitem{brezzi2009family}
+F. Brezzi, K. Lipnikov, and M. Shashkov,
+\newblock \emph{A family of mimetic finite difference methods on polygonal and polyhedral meshes for second order elliptic problems},
+\newblock SIAM Journal on Numerical Analysis, 43(3), 1192--1220, 2005.
+
+\end{thebibliography}
+
+
+\newpage
+\section{Introduction}
+
+Partial differential equations (PDEs) are essential tools for modeling various physical phenomena, including heat conduction, fluid dynamics, electromagnetism, and more. One of the fundamental PDEs in mathematical physics is the Poisson equation, which describes the potential field resulting from a given charge or mass density distribution.
+
+\subsection{The Poisson Problem with Non-Homogeneous Dirichlet Boundary Conditions}
+
+Let $\Omega \subset \mathbb{R}^n$ be a bounded domain with Lipschitz continuous boundary $\partial \Omega$. We consider the Poisson problem with non-homogeneous Dirichlet boundary conditions:
+
+\begin{align}
+    -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
+    u &= g \quad \text{on } \partial \Omega, \label{eq:dirichlet}
+\end{align}
+
+where:
+
+\begin{itemize}
+    \item $f \in L^2(\Omega)$ is a given source term.
+    \item $g \in H^{1/2}(\partial \Omega)$ is a prescribed boundary function.
+    \item $u$ is the unknown function to be solved for, representing, for example, the potential field.
+\end{itemize}
+
+\subsubsection{Variational Formulation}
+
+To derive the variational formulation, we proceed as follows:
+
+1. **Define the Appropriate Function Space**:
+
+   Since the boundary condition is non-homogeneous, we cannot directly use the space $H_0^1(\Omega)$ for the trial and test functions. Instead, we introduce:
+
+   \[
+   H_g^1(\Omega) = \{ v \in H^1(\Omega) \mid v = g \text{ on } \partial \Omega \}.
+   \]
+
+   The space of test functions remains:
+
+   \[
+   H_0^1(\Omega) = \{ v \in H^1(\Omega) \mid v = 0 \text{ on } \partial \Omega \}.
+   \]
+
+2. **Introduce a Lifting Function**:
+
+   To handle the non-homogeneous boundary condition, we decompose $u$ into two parts:
+
+   \[
+   u = u_0 + \tilde{g},
+   \]
+
+   where:
+
+   - $\tilde{g} \in H^1(\Omega)$ is any function satisfying $\tilde{g} = g$ on $\partial \Omega$.
+   - $u_0 \in H_0^1(\Omega)$ is the unknown function to be solved for.
+
+3. **Rewriting the PDE**:
+
+   Substituting $u = u_0 + \tilde{g}$ into equation~\eqref{eq:poisson}, we get:
+
+   \[
+   -\Delta (u_0 + \tilde{g}) = f \quad \text{in } \Omega.
+   \]
+
+   Simplifying:
+
+   \[
+   -\Delta u_0 = f + \Delta \tilde{g} \quad \text{in } \Omega.
+   \]
+
+4. **Variational Problem**:
+
+   Multiply both sides by a test function $v \in H_0^1(\Omega)$ and integrate over $\Omega$:
+
+   \[
+   \int_\Omega -\Delta u_0 \cdot v \, dx = \int_\Omega (f + \Delta \tilde{g}) v \, dx.
+   \]
+
+   Applying integration by parts and using the fact that $v = 0$ on $\partial \Omega$:
+
+   \[
+   \int_\Omega \nabla u_0 \cdot \nabla v \, dx = \int_\Omega (f + \Delta \tilde{g}) v \, dx.
+   \]
+
+   Therefore, the variational problem is to find $u_0 \in H_0^1(\Omega)$ such that:
+
+   \begin{equation}
+   a(u_0, v) = (f + \Delta \tilde{g}, v) \quad \forall v \in H_0^1(\Omega), \label{eq:variational}
+   \end{equation}
+
+   where:
+
+   \[
+   a(u_0, v) = \int_\Omega \nabla u_0 \cdot \nabla v \, dx, \quad (f + \Delta \tilde{g}, v) = \int_\Omega (f + \Delta \tilde{g}) v \, dx.
+   \]
+
+5. **Alternative Approach without Lifting Function**:
+
+   Alternatively, we can formulate the problem directly without introducing a lifting function by considering test functions in $H_0^1(\Omega)$ and trial functions in $H_g^1(\Omega)$. The variational problem then becomes:
+
+   \begin{equation}
+   \text{Find } u \in H_g^1(\Omega) \text{ such that } a(u, v) = (f, v) \quad \forall v \in H_0^1(\Omega). \label{eq:variational_nonhomogeneous}
+   \end{equation}
+
+   Here, the boundary condition is naturally incorporated into the space $H_g^1(\Omega)$.
+
+\subsubsection{Existence and Uniqueness of the Solution}
+
+\begin{theorem}[Lax-Milgram Theorem for Non-Homogeneous Boundary Conditions]
+Under the given assumptions, there exists a unique $u \in H_g^1(\Omega)$ satisfying the variational problem~\eqref{eq:variational_nonhomogeneous}.
+\end{theorem}
+
+\begin{proof}
+The bilinear form $a(u, v)$ is continuous and coercive on $H_0^1(\Omega)$. The linear functional $L(v) = \int_\Omega f v \, dx$ is continuous on $H_0^1(\Omega)$. Although $u$ is sought in $H_g^1(\Omega)$, the test functions $v$ are in $H_0^1(\Omega)$, allowing the application of the Lax-Milgram theorem to guarantee the existence of a unique solution.
+\end{proof}
+
+\subsection{Virtual Element Space with Non-Homogeneous Boundary Conditions}
+
+When dealing with non-homogeneous Dirichlet boundary conditions in the Virtual Element Method, special attention must be given to the handling of the boundary data.
+
+\subsubsection{Modification of the Virtual Element Space}
+
+The global virtual element space is now defined as:
+
+\[
+V_h = \{ v_h \in H^1(\Omega) \mid v_h|_E \in V_h^E, \ \forall E \in \mathcal{T}_h \},
+\]
+
+with the boundary condition enforced through:
+
+\[
+v_h(\mathbf{x}) = g_h(\mathbf{x}) \quad \text{on } \partial \Omega,
+\]
+
+where $g_h$ is an appropriate approximation of $g$ on the mesh.
+
+\subsubsection{Enforcing the Boundary Condition}
+
+There are several ways to handle the non-homogeneous boundary condition:
+
+1. **Direct Imposition**:
+
+   - Set the nodal values of $v_h$ at boundary nodes to the prescribed values of $g_h$.
+   - This method is straightforward when the DOFs include nodal values at the vertices.
+
+2. **Lifting Technique**:
+
+   - Decompose $v_h$ as $v_h = v_{0h} + \tilde{g}_h$, where $\tilde{g}_h$ is a discrete lifting of the boundary data satisfying $\tilde{g}_h = g_h$ on $\partial \Omega$.
+   - Solve for $v_{0h} \in V_{0h}$ with homogeneous boundary conditions.
+
+3. **Penalty Methods**:
+
+   - Add a penalty term to the variational formulation to weakly enforce the boundary condition.
+   - This method is more complex and may introduce additional parameters.
+
+In this report, we will focus on the first approach, which is suitable for low-order VEM where the DOFs are nodal values at the vertices.
+
+\subsection{Discrete Bilinear Form with Non-Homogeneous Boundary Conditions}
+
+The discrete variational problem seeks $u_h \in V_h$ such that:
+
+\begin{equation}
+a_h(u_h, v_h) = (f, v_h) \quad \forall v_h \in V_{0h}, \label{eq:discrete_variational}
+\end{equation}
+
+where:
+
+- $V_{0h} = \{ v_h \in V_h \mid v_h = 0 \text{ on } \partial \Omega \}$.
+- $a_h(u_h, v_h)$ is the discrete bilinear form approximating $a(u, v_h)$.
+
+\subsubsection{Assembly of the Stiffness Matrix}
+
+The local stiffness matrix $K^E$ is assembled similarly to the homogeneous case, with the basis functions adjusted to account for the boundary values:
+
+\[
+K^E_{ij} = a_h^E(\varphi_i, \varphi_j) = (\nabla \varphi_i, \nabla \varphi_j)_{0,E},
+\]
+
+where $\{ \varphi_i \}$ are the local basis functions of $V_h^E$.
+
+\subsubsection{Assembly of the Load Vector}
+
+The local load vector $F^E$ now includes contributions from the non-homogeneous boundary conditions:
+
+\[
+F^E_i = \int_E f \varphi_i \, dx - \int_{\partial E} \sigma \varphi_i \, ds,
+\]
+
+where $\sigma$ represents the flux terms arising from integrating by parts when $u_h$ does not vanish on $\partial \Omega$.
+
+However, since we are directly imposing the boundary conditions by setting $u_h = g_h$ on $\partial \Omega$, the load vector is computed as:
+
+\[
+F^E_i = \int_E f \varphi_i \, dx.
+\]
+
+\subsection{Implementation Steps}
+
+1. **Approximation of Boundary Data**:
+
+   - Define $g_h$ by interpolating $g$ at the boundary nodes.
+   - For each boundary node $i$, set $u_h^i = g_h^i$.
+
+2. **Modification of the Stiffness Matrix and Load Vector**:
+
+   - Separate the degrees of freedom into interior and boundary nodes.
+   - For boundary nodes, the corresponding rows in the stiffness matrix are modified to enforce $u_h^i = g_h^i$.
+   - Adjust the load vector to account for the prescribed boundary values.
+
+3. **Solving the Linear System**:
+
+   - Assemble the global stiffness matrix $K$ and load vector $F$.
+   - Apply boundary conditions to modify $K$ and $F$ accordingly.
+   - Solve the resulting linear system for the unknown interior nodal values.
+
+\subsection{Example: Applying VEM to a Problem with Non-Homogeneous Boundary Conditions}
+
+Consider a specific problem where:
+
+- $\Omega$ is a unit square domain.
+- $f(x, y) = -2 \pi^2 \sin(\pi x) \sin(\pi y)$.
+- $g(x, y) = \sin(\pi x) \sin(\pi y)$ on $\partial \Omega$.
+
+The exact solution is known to be:
+
+\[
+u(x, y) = \sin(\pi x) \sin(\pi y).
+\]
+
+\subsubsection{Implementation Steps}
+
+1. **Mesh Generation**:
+
+   - Create a polygonal mesh of $\Omega$, possibly using general quadrilaterals or other polygons.
+
+2. **Virtual Element Space Construction**:
+
+   - Define $V_h$ with DOFs at the vertices.
+   - Interpolate $g$ at the boundary nodes to obtain $g_h$.
+
+3. **Assembly of Matrices and Vectors**:
+
+   - Assemble the local stiffness matrices $K^E$ for each element.
+   - Compute the local load vectors $F^E$ using the exact $f$.
+
+4. **Application of Boundary Conditions**:
+
+   - For each boundary node $i$, set $u_h^i = g_h^i$.
+   - Modify the global stiffness matrix and load vector accordingly.
+
+5. **Solving the Linear System**:
+
+   - Solve for the unknown interior nodal values.
+
+6. **Post-Processing**:
+
+   - Combine the interior and boundary nodal values to obtain the complete solution $u_h$.
+   - Compare $u_h$ with the exact solution $u$ to assess the accuracy.
+
+\subsection{Conclusion}
+
+Expanding the Poisson problem to include non-homogeneous Dirichlet boundary conditions introduces additional considerations in the formulation and implementation of the Virtual Element Method. By appropriately handling the boundary data, either through direct imposition or lifting techniques, we can effectively apply VEM to a broader class of problems.
+
+The key changes include:
+
+- Adjusting the function spaces to accommodate non-homogeneous boundary conditions.
+- Modifying the variational formulation and ensuring that the test functions remain in $H_0^1(\Omega)$.
+- Handling the boundary conditions during the assembly of the stiffness matrix and load vector.
+
+In practice, the direct imposition of boundary conditions is often the simplest and most efficient approach, especially for low-order VEM where DOFs are located at the vertices.
+
+\subsection{References}
+
+\begin{thebibliography}{9}
+
+\bibitem{beirao2013basic}
+L. Beir\~ao da Veiga, F. Brezzi, L. D. Marini, and A. Russo,
+\newblock \emph{The basic principles of virtual element methods},
+\newblock Mathematical Models and Methods in Applied Sciences, 23(01), 199--214, 2013.
+
+\bibitem{beirao2014hitchhiker}
+L. Beir\~ao da Veiga, F. Brezzi, A. Cangiani, G. Manzini, L. D. Marini, and A. Russo,
+\newblock \emph{The hitchhiker's guide to the virtual element method},
+\newblock Mathematical Models and Methods in Applied Sciences, 24(08), 1541--1573, 2014.
+
+\bibitem{brezzi2009family}
+F. Brezzi, K. Lipnikov, and M. Shashkov,
+\newblock \emph{A family of mimetic finite difference methods on polygonal and polyhedral meshes for second order elliptic problems},
+\newblock SIAM Journal on Numerical Analysis, 43(3), 1192--1220, 2005.
+
+\end{thebibliography}
+
+\end{document}

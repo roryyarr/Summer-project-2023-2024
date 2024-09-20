@@ -1,0 +1,129 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning}
+
+\tikzset{
+    state/.style = {rectangle, draw, rounded corners, text width=8em, text centered, minimum height=2em, fill=gray!10},
+    decision/.style = {diamond, draw, text width=5em, text centered, aspect=2, fill=yellow!20},
+    startstop/.style = {ellipse, draw, text centered, minimum height=2em, fill=red!20},
+    arrow/.style = {thick,->,>=stealth}
+}
+
+\begin{document}
+\begin{tikzpicture}[node distance=2cm]
+    % States
+    \node (start) [startstop] {Start};
+    \node (loadmesh) [state, below of=start] {Load mesh and problem from file};
+    \node (initialize) [state, below of=loadmesh] {Initialize stiffness matrix K, forcing vector F, and solution vector u};
+    \node (definepoly) [state, below of=initialize] {Define shape functions and polynomial basis};
+    \node (loopelem) [decision, below of=definepoly, yshift=-1cm] {Loop over elements?};
+    \node (extract) [state, right of=loopelem, xshift=5cm] {Extract element vertices and compute geometry: centroid, area, diameter};
+    \node (geom) [state, below of=extract] {Compute geometric properties};
+
+    \node (loopsides) [decision, below of=geom, yshift=-1cm] {Loop over sides?};
+    \node (sidenormals) [state, below of=loopsides] {Compute side normals and edge lengths};
+    \node (loopsideback) [state, left of=sidenormals, xshift=-5cm] {Next side?};
+    
+    \node (assemble) [state, below of=sidenormals, yshift=-1cm] {Assemble local matrices and vectors};
+
+    \node (loopvertices) [decision, below of=assemble, yshift=-1cm] {Loop over vertices?};
+    \node (vertexcontrib) [state, below of=loopvertices] {Compute vertex-based contributions to stiffness matrix};
+    \node (polyloop) [decision, below of=vertexcontrib, yshift=-1cm] {Loop over polynomial basis?};
+    \node (projection) [state, below of=polyloop] {Calculate projection onto polynomial space};
+    \node (updatek) [state, below of=projection] {Update stiffness matrix K and force vector F};
+    \node (nextvertex) [state, left of=updatek, xshift=-5cm] {Next vertex?};
+
+    \node (ritz) [state, below of=updatek, yshift=-1cm] {Compute local stiffness matrix using Ritz projector};
+    \node (stabilize) [state, below of=ritz] {Apply stabilization term to stiffness matrix};
+    \node (assembleglobal) [state, below of=stabilize] {Assemble global stiffness matrix K};
+    \node (updateglobal) [state, below of=assembleglobal] {Update global stiffness matrix and force vector};
+
+    \node (allprocessed) [decision, below of=updateglobal, yshift=-1cm] {All elements processed?};
+    \node (enforceboundary) [state, right of=allprocessed, xshift=5cm] {Enforce boundary conditions};
+    \node (dofs) [state, below of=enforceboundary] {Compute internal DOFs};
+    \node (assemblefinal) [state, below of=dofs] {Assemble final system of equations};
+    \node (solve) [state, below of=assemblefinal] {Solve the system for u};
+    \node (postprocess) [state, below of=solve] {Post-process solution values};
+    \node (end) [startstop, below of=postprocess] {End};
+
+    % Connections
+    \draw [arrow] (start) -- (loadmesh);
+    \draw [arrow] (loadmesh) -- (initialize);
+    \draw [arrow] (initialize) -- (definepoly);
+    \draw [arrow] (definepoly) -- (loopelem);
+    \draw [arrow] (loopelem.east) -- node[anchor=south] {Yes} (extract.west);
+    \draw [arrow] (extract) -- (geom);
+    \draw [arrow] (geom) -- (loopsides);
+    \draw [arrow] (loopsides) -- (sidenormals);
+    \draw [arrow] (sidenormals) -- (assemble);
+    \draw [arrow] (assemble) -- (loopvertices);
+    \draw [arrow] (loopvertices) -- (vertexcontrib);
+    \draw [arrow] (vertexcontrib) -- (polyloop);
+    \draw [arrow] (polyloop) -- (projection);
+    \draw [arrow] (projection) -- (updatek);
+    \draw [arrow] (updatek) -- (ritz);
+    \draw [arrow] (ritz) -- (stabilize);
+    \draw [arrow] (stabilize) -- (assembleglobal);
+    \draw [arrow] (assembleglobal) -- (updateglobal);
+    \draw [arrow] (updateglobal) -- (allprocessed);
+    
+    % Loop back connections
+    \draw [arrow] (loopsides) -- node[anchor=east] {Next side?} (loopsideback);
+    \draw [arrow] (loopsideback) |- (loopsides);
+    \draw [arrow] (loopvertices) -- node[anchor=east] {Next vertex?} (nextvertex);
+    \draw [arrow] (nextvertex) |- (loopvertices);
+    \draw [arrow] (allprocessed.east) -- node[anchor=south] {Yes} (enforceboundary.west);
+    \draw [arrow] (enforceboundary) -- (dofs);
+    \draw [arrow] (dofs) -- (assemblefinal);
+    \draw [arrow] (assemblefinal) -- (solve);
+    \draw [arrow] (solve) -- (postprocess);
+    \draw [arrow] (postprocess) -- (end);
+    
+    % Loop back from No to start of element loop
+    \draw [arrow] (allprocessed.west) -- node[anchor=south] {No} ++(-2,0) |- (extract);
+\end{tikzpicture}
+\end{document}
+
+
+graph TB
+    A((Start)) --> B[Load mesh and problem from file]
+    B --> C[Initialize stiffness matrix K, forcing vector F, and solution vector u]
+    C --> D[Define shape functions and polynomial basis]
+    D --> D1{Loop over elements of the mesh}
+    
+    D1 -->|Yes| D2[Extract element vertices and compute geometry: centroid, area, diameter]
+    D2 --> D3[Compute geometric properties]
+    
+    %% Small loop for sides of the element
+    D3 --> D3a{Loop over sides of each element}
+    D3a --> D3b[Compute side normals and edge lengths]
+    D3b --> D3a{Next side?}
+    D3a -->|No| D4[Assemble local matrices and vectors]
+    
+    %% Small loop for vertices
+    D4 --> D4a{Loop over vertices}
+    D4a --> D4b[Compute vertex-based contributions to stiffness matrix]
+    D4b --> D4b1{Loop over polynomial basis functions}
+    D4b1 --> D4b2[Calculate projection onto polynomial space]
+    D4b2 --> D4b3[Update stiffness matrix K and force vector F]
+    D4b3 --> D4a{Next vertex?}
+    D4a -->|No| D5[Compute local stiffness matrix using Ritz projector]
+
+    D5 --> D6[Apply stabilization term to stiffness matrix]
+    D6 --> D7[Assemble global stiffness matrix K]
+    D7 --> D8[Update global stiffness matrix and force vector]
+    D8 --> D9[Add boundary conditions and external forces]
+    D9 --> D1
+
+    %% Positioning decision to the right using invisible node
+    D1 --> D10{All elements processed?}
+    D10 -->|No| D2
+    D10 -->|Yes| E[Enforce boundary conditions]
+    subgraph .
+        direction LR
+        E --> F["Compute internal degrees of freedom (DOFs)"]
+        F --> G[Assemble final system of equations]
+        G --> H[Solve the system for u]
+        H --> I[Post-process solution values]
+        I --> J((End))
+    end

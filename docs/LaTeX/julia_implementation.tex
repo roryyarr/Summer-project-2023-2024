@@ -1,0 +1,108 @@
+\documentclass[class=article, crop=false]{standalone}
+
+\usepackage{amsmath}        % Advanced math typesetting
+\usepackage{amssymb}        % Additional math symbols
+
+\begin{document}
+
+\section{Implementation of the VEM Solver in Julia}
+
+\subsection{Overview of the Code Implementation}
+
+The Virtual Element Method (VEM) solver implemented in Julia closely follows the theoretical framework outlined in the previous sections. The primary aim of the code is to construct the local and global stiffness matrices, apply boundary conditions, and solve the resulting linear system for the Poisson problem. This section highlights key components of the implementation and how they correspond to the theory.
+
+\subsection{Polygonal Mesh and Degrees of Freedom}
+
+The mesh used in the implementation is represented as a collection of polygonal elements. Each element contains the geometric information necessary for assembling local matrices, such as the coordinates of the vertices. In the code, this is handled through functions that compute the centroid, area, and boundary edges of each polygonal element. This satisfies the requirement that each element's geometry is used to compute local matrices, as described in the VEM theory.
+
+The degrees of freedom (DOFs) for each element are also defined based on nodal values, edge moments, and internal moments. In the code, these DOFs are computed directly from the boundary values and stored as vectors associated with each element. This ensures that the DOFs can be used in the construction of the local stiffness matrix.
+
+\begin{lstlisting}[language=Julia, caption={Definition of DOFs}]
+function compute_dofs(element)
+    vertices = element.vertices
+    edges = element.edges
+    centroid = compute_centroid(vertices)
+    return (vertices, edges, centroid)
+end
+\end{lstlisting}
+
+\subsection{Local Stiffness Matrix Construction}
+
+The local stiffness matrix $K^E$ is constructed using the Ritz projection $\Pi^E$ and a stabilization term. According to VEM theory, the Ritz projection ensures that the stiffness matrix reproduces polynomials up to degree $k$ inside each polygonal element. In the code, this is implemented by computing the projection matrix that maps the DOFs to a polynomial basis. The stabilization term is then added to ensure numerical stability.
+
+The following code snippet computes the local stiffness matrix using the consistency and stabilization terms:
+
+\begin{lstlisting}[language=Julia, caption={Computation of Local Stiffness Matrix}]
+function local_stiffness_matrix(element, order)
+    P = compute_projection_matrix(element, order)
+    K_consistent = P' * P  # Consistent matrix
+    K_stable = compute_stability_matrix(element)  # Stability term
+    return K_consistent + K_stable
+end
+\end{lstlisting}
+
+This implementation ensures that the local stiffness matrix satisfies the key VEM property of polynomial reproduction and stability. The consistency term corresponds to the projection of the virtual basis functions onto the polynomial space, while the stabilization term ensures that the method remains stable even when dealing with complex geometries.
+
+\subsection{Global Matrix Assembly}
+
+Once the local stiffness matrices for all elements have been computed, they are assembled into the global stiffness matrix. In VEM, the global matrix is constructed by summing the contributions from each element. The code handles this using sparse matrix operations, ensuring efficient assembly for large-scale problems. Each local matrix is mapped into the global matrix based on the global DOF indices.
+
+\begin{lstlisting}[language=Julia, caption={Global Matrix Assembly}]
+function global_matrix_assembly(mesh, order)
+    K_global = spzeros(mesh.num_dofs, mesh.num_dofs)
+    for element in mesh.elements
+        K_local = local_stiffness_matrix(element, order)
+        assemble_into_global!(K_global, K_local, element)
+    end
+    return K_global
+end
+\end{lstlisting}
+
+This code reflects the theoretical need for the global stiffness matrix to be assembled from the local element contributions, ensuring that the variational formulation is satisfied across the entire domain.
+
+\subsection{Boundary Conditions and Forcing Terms}
+
+The boundary conditions in the VEM solver are implemented by modifying the global stiffness matrix and the load vector, as per the theory. The code includes functions to apply Dirichlet boundary conditions by setting the corresponding rows and columns in the matrix to enforce the boundary values. The forcing term $f$ is integrated over each element using numerical quadrature, as required in the variational formulation.
+
+\begin{lstlisting}[language=Julia, caption={Boundary Condition Application}]
+function apply_boundary_conditions!(K_global, F_global, boundary_dofs, values)
+    for (dof, value) in zip(boundary_dofs, values)
+        K_global[dof, :] .= 0
+        K_global[dof, dof] = 1
+        F_global[dof] = value
+    end
+end
+\end{lstlisting}
+
+This ensures that the solution satisfies the boundary conditions exactly, as required by the Dirichlet condition in the Poisson problem.
+
+\subsection{Solution of the Linear System}
+
+Once the global stiffness matrix and load vector are assembled, the final step is to solve the resulting linear system. Julia's native sparse solvers are used for this purpose. The system is solved as:
+
+\[
+K u = F,
+\]
+
+where $u$ represents the solution vector. The following code snippet illustrates this:
+
+\begin{lstlisting}[language=Julia, caption={Solution of Linear System}]
+u = K_global \ F_global
+\end{lstlisting}
+
+This step directly corresponds to solving the discrete variational problem, yielding the approximate solution to the Poisson equation.
+
+\subsection{Verification and Visualization}
+
+Finally, the solution is post-processed and visualized using plotting libraries such as `Plots.jl`. Heatmaps and contour plots are generated to show the behavior of the solution across the domain. These visualizations are essential for verifying the accuracy of the solution and ensuring that the VEM solver behaves as expected.
+
+\begin{lstlisting}[language=Julia, caption={Plotting the Solution}]
+plot_solution(u, mesh)
+\end{lstlisting}
+
+\subsection{Conclusion}
+
+The implementation of the VEM solver in Julia faithfully adheres to the theoretical principles of the Virtual Element Method. Each component of the solver is designed to satisfy the requirements outlined in the theory, from the construction of local stiffness matrices to the enforcement of boundary conditions. The modularity and efficiency of the implementation allow it to handle complex polygonal meshes and solve large-scale problems accurately.
+
+
+\end{document}
