@@ -143,76 +143,50 @@ where $V_h^E$ denotes the local virtual element space on each element $E \in \ma
 \cite{sutton2017virtual}
 
 
+\subsection{Basis Functions}
+Let $\{\varphi_i^E\}_{i=1}^{N_E} \subset V_h$ be the set of orthonormal basis functions for the local virtual element spaces. Where $\phi_i(v_j) = \phi_{ij}.$
 
-\subsubsection{Degrees of freedom}
+One of the strengths of VEM is they do not need to be explicitly defined. However for the purposes of this paper the basis functions can be constructed using associated Lagrangian polynomials for the nodes of the mesh. Specifically, for each basis function $\varphi_i$, we have
+$$
+\varphi_i(\mathbf{x}) = \prod_{k=1}^{n} l_{ik}(x_k),
+$$
+where:
+\begin{itemize}
+    \item $\mathbf{x} = (x_1, x_2, \ldots, x_n)$ represents the coordinates in $n$-dimensional space.
+    \item $l_{ik}(x_k)$ is the $k$-th one-dimensional Lagrange polynomial associated with the $i$-th basis function along the $k$-th coordinate direction.
+\end{itemize}
+
+\subsubsection{Polynomial Basis}
+Additionally, we need a basis for the polynomial space $\mathcal{P}_E$. There are many possible basis functions. Although we will stick to just the scaled monimal basis.
+\begin{equation}
+    \mathcal{M}_E = \left(\cfrac{\mathbf{x} - \mathbf{x}_{\mathcal{D}}}{h_{\mathcal{D}}}\right)^{\alpha}
+\end{equation}
+
+For 2-dimensions:
+\begin{equation}
+    \mathcal{M}_E = \left\{m_1(x,y) = 1,\ m_2(x,y) = \cfrac{x-x_E}{h},\ m_3(x,y) = \cfrac{y-y_E}{h}, \cdots\right\}
+\end{equation}
+
+
+
+\subsection{Degrees of freedom}
 The degrees of freedom can be of the following forms:
 \begin{itemize}
     \item For $\mathcal{P}_1$ the DOFs are the vertices:
     $$\text{DOFs for } \mathcal{P}_1: \quad \{ u(V_i) \}_{i=1}^{N_v}$$
     where $V_i$ denotes the $i$-th vertex and $N_v$ is the number of vertices of the element.
     
-    \item For $\mathcal{P}_1$ the DOFs are the vertices:
+    \item For $\mathcal{P}_2$ the DOFs are the vertices:
     $$\text{DOFs for } \mathcal{P}_2: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e}$$
     where $E_j$ is the midpoint of $j$-th edge and $N_e$ is the number of edges.
     
-    \item For $\mathcal{P}_1$ the DOFs are the vertices:
+    \item For $\mathcal{P}_k$ the DOFs are the vertices:
     $$\text{DOFs for } \mathcal{P}_k: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e} \cup \{ m_l(u) \}_{l=1}^{N_m}$$
     where $m_l(u)$ is the $l$-th internal moment of an element and $N_m$ is the total number of such moments.
 
-    \item Additionally, some other combination of internal moments may be derived for the DOFs.    
+    \item Additionally, other combination of internal moments may be derived for the DOFs.    
 \end{itemize}
 
-\subsubsection{Degrees of Freedom}
-In the Virtual Element Method (VEM), the choice of degrees of freedom (DOFs) is crucial for accurately representing the solution space on each element. The DOFs determine how the virtual element space approximates the underlying continuous problem. The degrees of freedom can take various forms depending on the polynomial order and the specific requirements of the method. The primary forms of DOFs in VEM are outlined below:
-
-\begin{itemize}
-    \item \textbf{Linear Polynomials ($\mathcal{P}_1$):}
-    For $\mathcal{P}_1$, which corresponds to linear polynomial approximation, the degrees of freedom are associated with the vertices of each element. Specifically, each vertex of the polygonal (or polyhedral) element serves as a DOF, where the value of the basis function is defined.
-    $$
-    \text{DOFs for } \mathcal{P}_1: \quad \{ u(V_i) \}_{i=1}^{N_v}
-    $$
-    where $V_i$ denotes the $i$-th vertex of the element and $N_v$ is the total number of vertices.
-
-    \item \textbf{Quadratic Polynomials ($\mathcal{P}_2$):}
-    For $\mathcal{P}_2$, corresponding to quadratic polynomial approximation, the degrees of freedom extend beyond the vertices to include mid-edge values. This allows for a higher degree of flexibility and accuracy in the approximation.
-    $$
-    \text{DOFs for } \mathcal{P}_2: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e}
-    $$
-    where $E_j$ represents the midpoint of the $j$-th edge and $N_e$ is the number of edges of the element.
-
-    \item \textbf{Higher-Order Polynomials ($\mathcal{P}_k$, $k \geq 3$):}
-    For higher-order polynomial spaces, the degrees of freedom further include internal moments. These internal DOFs capture the behavior of the solution within the interior of the element, enhancing the method's ability to approximate complex solution features.
-    $$
-    \text{DOFs for } \mathcal{P}_k: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e} \cup \{ m_l(u) \}_{l=1}^{N_m}
-    $$
-    where $m_l(u)$ denotes the $l$-th moment of the solution $u$ inside the element, and $N_m$ is the number of internal moments required for the polynomial degree $k$.
-
-    \item \textbf{Enhanced Virtual Element Spaces:}
-    In some advanced formulations of VEM, additional degrees of freedom may be introduced to improve approximation properties or to enforce certain constraints. These can include:
-    \begin{itemize}
-        \item \textbf{Edge Moments:} Higher-order moments on each edge can be included to capture more detailed variations along the edges.
-        \item \textbf{Interior Degrees of Freedom:} Additional internal DOFs may be incorporated to represent gradients or higher-order derivatives within the element.
-    \end{itemize}
-    These enhancements allow VEM to achieve higher accuracy and better stability properties, especially for problems with complex geometries or solution behaviors.
-\end{itemize}
-
-\subsection{Basis Functions}
-Let $\{\varphi_i\}_{i=1}^{N} \subset V_h$ be the set of basis functions for the virtual element space. One of the strengths of VEM is they do not need to be explicitly defined. However for the purposes of this paper the basis functions can be constructed using Lagrangian polynomials associated with the nodes of the mesh. Specifically, for each basis function $\varphi_i$, we have
-$$
-\varphi_i(x, y) = l_i(x) m_i(y),
-$$
-where $l_i(x)$ and $m_i(y)$ are Lagrange polynomials in the $x$ and $y$ directions, respectively.
-
-\subsubsection{Basis Functions in $n$ Dimensions}
-In an $n$-dimensional domain, each basis function $\varphi_i$ can be constructed as a product of one-dimensional Lagrange polynomials along each coordinate direction. Let $\mathbf{x} = (x_1, x_2, \ldots, x_n) \in \mathbb{R}^n$ denote a point in the $n$-dimensional space. The basis functions are defined as
-\[
-\varphi_i(\mathbf{x}) = \prod_{k=1}^{n} l_{ik}(x_k),
-\]
-where:
-\begin{itemize}
-    \item $\mathbf{x} = (x_1, x_2, \ldots, x_n)$ represents the coordinates in $n$-dimensional space.
-    \item $l_{ik}(x_k)$ is the $k$-th one-dimensional Lagrange polynomial associated with the $i$-th basis function along the $k$-th coordinate direction.
-\end{itemize}
 
 
 \subsection{Ritz Projection}
