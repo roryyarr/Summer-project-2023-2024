@@ -1,0 +1,320 @@
+\documentclass[class=article, crop=false]{standalone}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\section{Theory}
+
+\subsection{Poisson Problem}
+The non-homogeneous Poisson problem is defined as:
+\begin{align}
+    -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
+    u &= g \quad \text{on } \partial \Omega, \label{eq:dirichlet}
+\end{align}
+
+Where:
+\begin{itemize}
+    \item $\Omega \subset \mathbb{R}^n$ is a bounded domain.
+    \item $\partial\Omega$ is the boundary of $\Omega$ and is Lipschitz continuous.
+    \item $f \in L^2(\Omega)$ represents the source term.
+    \item $g \in H^{1/2}(\partial\Omega)$ is the boundary function.
+    \item $u$ is the unknown solution function.
+\end{itemize}
+
+
+\subsubsection{The Variational Forms}
+To derive the variational form of the Poisson problem, follow these steps:
+
+\begin{enumerate}
+    \item \textbf{Define the Sobolev Space:}
+    $$
+    H^1_g(\Omega) = \left\{ v \in H^1(\Omega) \ \bigg| \ v = g \text{ on } \partial\Omega \right\}.
+    $$
+    
+    \item \textbf{Decompose the Solution:}
+    Assume that the solution $u$ can be written as:
+    $$
+    u = u_0 + \tilde{g},
+    $$
+    where $\tilde{g}$ is an extension of the boundary function $g$ into the domain $\Omega$, i.e., $\tilde{g} \equiv g$ on $\partial\Omega$.
+
+    \item \textbf{Substitute into the Poisson Equation:}
+    Substituting $u = u_0 + \tilde{g}$ into equation \eqref{eq:poisson} yields:
+    $$
+    -\Delta (u_0 + \tilde{g}) = f.
+    $$
+    Simplifying, we obtain:
+    $$
+    -\Delta u_0 = f + \Delta \tilde{g}.
+    $$
+    
+    \item \textbf{Define the Homogeneous Sobolev Space:}
+    Introduce the Sobolev space with homogeneous boundary conditions:
+    $$
+    H^1_0(\Omega) = \left\{ v \in H^1(\Omega) \ \bigg| \ v = 0 \text{ on } \partial\Omega \right\}.
+    $$
+    
+    \item \textbf{Multiply by a Test Function and Integrate:}
+    Multiply both sides of the equation by a test function $v \in H^1_0(\Omega)$ and integrate over $\Omega$:
+    $$
+    \int_{\Omega} -\Delta u_0 \cdot v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx.
+    $$
+    
+    \item \textbf{Apply Integration by Parts:}
+    Using integration by parts, we have:
+    $$
+    \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx,
+    $$
+    where the boundary terms vanish since $v = 0$ on $\partial\Omega$.
+    
+    \item \textbf{Formulate the Variational Problem:}
+    The variational problem can now be stated as: Find $u_0 \in H^1_0(\Omega)$ such that
+    \begin{equation}
+        a(u_0, v) = (f + \Delta \tilde{g}, v) \quad \forall v \in H^1_0(\Omega),
+        \label{eq:variational}
+    \end{equation}
+    where
+    $$
+    a(u_0, v) = \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx, \quad \text{and} \quad 
+    (f + \Delta \tilde{g}, v) = \int_{\Omega} (f + \Delta \tilde{g}) v \, dx.
+    $$
+\end{enumerate}
+
+\subsection{Existence and Uniqueness of the Solution}
+
+\subsubsection{Lax-Milgram Theorem}
+\begin{theorem}[Lax-Milgram]
+    Let $H$ be a real Hilbert space, and let $a(u,v)$  be a bilinear form that is:
+    \begin{itemize}
+        \item \textbf{Bounded}: There exists a constant $C > 0$ such that
+        $$
+        |a(u, v)| \leq C \|u\|_H \|v\|_H \quad \forall u, v \in H.
+        $$
+        \item \textbf{Positive definite}: There exists a constant $\alpha > 0$ such that
+        $$
+        a(v, v) \geq \alpha \|v\|_V^2 \quad \forall v \in H.
+        $$
+    \end{itemize}
+    Let $L: H \rightarrow \mathbb{R}$ be a bounded linear functional. Then, there exists a unique $u \in V$ such that
+    $$
+    a(u, v) = L(v) \quad \forall v \in H.
+    $$
+\end{theorem}
+
+\subsubsection{Application to the Poisson Problem}
+Given $H^1_0(\Omega)$ is a Hilbert space $u_0$ has a unique solution because:
+\begin{itemize}
+    \item $|a(u_0,v)| \leq ||u_0||_{H^1_0{\Omega}} ||v||_{H^1_0{\Omega}} $ by the Cauchy-Schwarz inequality.\\
+    Hence $a(u_0,v)$ is bounded.
+
+    \item $a(v,v) = \int_{\Omega}|\nabla v|^2\ dx = ||^2_{H_0^1(\Omega)} \geq \alpha||^2_{H_0^1(\Omega)}$,\\
+    where $\alpha = 1.$ Thus showing $a(u_0,v)$ is positive definite.
+\end{itemize}
+
+Therefore there is a unique solution $L(v) = a(u_0,v) = \int_\Omega (f + \Delta\tilde{g})v\ dx$ by equation \eqref{eq:variational}\\
+$\qed$.
+
+\subsection{Discrete Bilinear Form}
+The local bilinear form $a^E: H^1(E) \times H^1(E) \rightarrow \mathbb{R}$ is defined by
+$$
+a^E(u, v) = \int_E \nabla u \cdot \nabla v \, dx,
+$$
+where $(\cdot, \cdot)_{0,E}$ denotes the $L^2$ inner product on the element $E$. The global bilinear form can then given by
+$$
+a^h(u, v) = \sum_{E \in \mathcal{T}_h} a^E(u, v).
+$$
+
+
+\subsection{Virtual Element Space}
+Let $\mathcal{T}_h$ be a finite sequence of partitions (mesh) of the domain $\Omega$. The virtual element space is defined as
+$$
+V_h := \left\{ v_h \in H^1_g(\Omega) \ \bigg| \ v_h|_E \in V_h^E \ \forall \, E \in \mathcal{T}_h \right\},
+$$
+where $V_h^E$ denotes the local virtual element space on each element $E \in \mathcal{T}_h$. They must also have the following three properties:
+\begin{enumerate}
+    \item $V^E_h$ includes the space of $\mathcal{P}_E$ polynomials.
+
+    \item The functions in $V^E_h$ are uniquely defined by the vertices and the$\operatorname{dim}(V^E_h) = N^E.$
+
+    \item All functions in $V^E_h$ are linear on the edges of the space.
+\end{enumerate}
+\cite{sutton2017virtual}
+
+
+
+\subsubsection{Degrees of freedom}
+The degrees of freedom can be of the following forms:
+\begin{itemize}
+    \item For $\mathcal{P}_1$ the DOFs are the vertices:
+    $$\text{DOFs for } \mathcal{P}_1: \quad \{ u(V_i) \}_{i=1}^{N_v}$$
+    where $V_i$ denotes the $i$-th vertex and $N_v$ is the number of vertices of the element.
+    
+    \item For $\mathcal{P}_1$ the DOFs are the vertices:
+    $$\text{DOFs for } \mathcal{P}_2: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e}$$
+    where $E_j$ is the midpoint of $j$-th edge and $N_e$ is the number of edges.
+    
+    \item For $\mathcal{P}_1$ the DOFs are the vertices:
+    $$\text{DOFs for } \mathcal{P}_k: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e} \cup \{ m_l(u) \}_{l=1}^{N_m}$$
+    where $m_l(u)$ is the $l$-th internal moment of an element and $N_m$ is the total number of such moments.
+
+    \item Additionally, some other combination of internal moments may be derived for the DOFs.    
+\end{itemize}
+
+\subsubsection{Degrees of Freedom}
+In the Virtual Element Method (VEM), the choice of degrees of freedom (DOFs) is crucial for accurately representing the solution space on each element. The DOFs determine how the virtual element space approximates the underlying continuous problem. The degrees of freedom can take various forms depending on the polynomial order and the specific requirements of the method. The primary forms of DOFs in VEM are outlined below:
+
+\begin{itemize}
+    \item \textbf{Linear Polynomials ($\mathcal{P}_1$):}
+    For $\mathcal{P}_1$, which corresponds to linear polynomial approximation, the degrees of freedom are associated with the vertices of each element. Specifically, each vertex of the polygonal (or polyhedral) element serves as a DOF, where the value of the basis function is defined.
+    $$
+    \text{DOFs for } \mathcal{P}_1: \quad \{ u(V_i) \}_{i=1}^{N_v}
+    $$
+    where $V_i$ denotes the $i$-th vertex of the element and $N_v$ is the total number of vertices.
+
+    \item \textbf{Quadratic Polynomials ($\mathcal{P}_2$):}
+    For $\mathcal{P}_2$, corresponding to quadratic polynomial approximation, the degrees of freedom extend beyond the vertices to include mid-edge values. This allows for a higher degree of flexibility and accuracy in the approximation.
+    $$
+    \text{DOFs for } \mathcal{P}_2: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e}
+    $$
+    where $E_j$ represents the midpoint of the $j$-th edge and $N_e$ is the number of edges of the element.
+
+    \item \textbf{Higher-Order Polynomials ($\mathcal{P}_k$, $k \geq 3$):}
+    For higher-order polynomial spaces, the degrees of freedom further include internal moments. These internal DOFs capture the behavior of the solution within the interior of the element, enhancing the method's ability to approximate complex solution features.
+    $$
+    \text{DOFs for } \mathcal{P}_k: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e} \cup \{ m_l(u) \}_{l=1}^{N_m}
+    $$
+    where $m_l(u)$ denotes the $l$-th moment of the solution $u$ inside the element, and $N_m$ is the number of internal moments required for the polynomial degree $k$.
+
+    \item \textbf{Enhanced Virtual Element Spaces:}
+    In some advanced formulations of VEM, additional degrees of freedom may be introduced to improve approximation properties or to enforce certain constraints. These can include:
+    \begin{itemize}
+        \item \textbf{Edge Moments:} Higher-order moments on each edge can be included to capture more detailed variations along the edges.
+        \item \textbf{Interior Degrees of Freedom:} Additional internal DOFs may be incorporated to represent gradients or higher-order derivatives within the element.
+    \end{itemize}
+    These enhancements allow VEM to achieve higher accuracy and better stability properties, especially for problems with complex geometries or solution behaviors.
+\end{itemize}
+
+\subsection{Basis Functions}
+Let $\{\varphi_i\}_{i=1}^{N} \subset V_h$ be the set of basis functions for the virtual element space. One of the strengths of VEM is they do not need to be explicitly defined. However for the purposes of this paper the basis functions can be constructed using Lagrangian polynomials associated with the nodes of the mesh. Specifically, for each basis function $\varphi_i$, we have
+$$
+\varphi_i(x, y) = l_i(x) m_i(y),
+$$
+where $l_i(x)$ and $m_i(y)$ are Lagrange polynomials in the $x$ and $y$ directions, respectively.
+
+\subsubsection{Basis Functions in $n$ Dimensions}
+In an $n$-dimensional domain, each basis function $\varphi_i$ can be constructed as a product of one-dimensional Lagrange polynomials along each coordinate direction. Let $\mathbf{x} = (x_1, x_2, \ldots, x_n) \in \mathbb{R}^n$ denote a point in the $n$-dimensional space. The basis functions are defined as
+\[
+\varphi_i(\mathbf{x}) = \prod_{k=1}^{n} l_{ik}(x_k),
+\]
+where:
+\begin{itemize}
+    \item $\mathbf{x} = (x_1, x_2, \ldots, x_n)$ represents the coordinates in $n$-dimensional space.
+    \item $l_{ik}(x_k)$ is the $k$-th one-dimensional Lagrange polynomial associated with the $i$-th basis function along the $k$-th coordinate direction.
+\end{itemize}
+
+
+\subsection{Ritz Projection}
+The Ritz projection operator $\Pi^E: V_h^E \rightarrow \mathcal{P}_k(E)$ is defined for each element $E \in \mathcal{T}_h$ by the following conditions:
+\begin{enumerate}
+    \item
+    \[
+    (\nabla (\Pi^E v_h - v_h), \nabla p)_{0,E} = 0 \quad \forall p \in \mathcal{P}_k(E),
+    \]
+    where $\mathcal{P}_k(E)$ is the space of polynomials of degree at most $k$ on $E$.
+    
+    \item
+    \[
+    \int_{\partial E} (\Pi^E v_h - v_h) \, ds = 0.
+    \]
+\end{enumerate}
+
+Expanding the first condition, we obtain
+\begin{align*}
+(\nabla \Pi^E v_h, \nabla p)_{0,E} &= (\nabla v_h, \nabla p)_{0,E} \\
+&= \sum_{e \in \partial E} \int_e v_h \, n_e \cdot \nabla p \, ds \\
+&= \sum_{e \in \partial E} \int_e v_h \, p \, n_e \, ds,
+\end{align*}
+where $n_e$ is the outward unit normal vector on edge $e$.
+
+The projection onto the space of constant functions is given by
+\[
+P_0 v_h = \frac{1}{|E|} \int_E v_h \, dx.
+\]
+
+The Ritz projection can be expressed as
+\[
+\Pi^E v_h = \sum_{i=1}^{N_E} s^i m_i,
+\]
+where $\{m_i\}$ are the basis functions of $\mathcal{P}_k(E)$ and $s^i$ are the coefficients to be determined.
+
+
+\subsection{Stiffness Matrix $K$}
+For each element $E \in \mathcal{T}_h$, the local stiffness matrix $K^E$ is defined by
+\[
+K^E_{ij} = \int_E \nabla \varphi_i \cdot \nabla \varphi_j \, dE.
+\]
+The global stiffness matrix $K$ is then assembled by summing the contributions from all elements:
+\begin{equation}
+    K = \sum_{E \in \mathcal{T}_h} K^E.
+\end{equation}
+
+\subsection{Load Vector $F$}
+The local load vector $F^E$ for each element $E \in \mathcal{T}_h$ is defined by
+\[
+F^E_i = \int_E f \varphi_i \, dE.
+\]
+The global load vector $F$ is obtained by assembling the local contributions:
+\begin{equation}
+    F = \sum_{E \in \mathcal{T}_h} F^E.
+\end{equation}
+
+\section{The Ritz Projection and Local Stiffness Matrix}
+Define the matrices $G$ and $\tilde{G}$ as
+\[
+G = BD \quad \text{and} \quad \tilde{G} = \tilde{B} D,
+\]
+where $B$, $\tilde{B}$, and $D$ are defined as follows.
+
+\section{Calculation of the Matrices}
+For each element $E \in \mathcal{T}_h$, define the matrix $B_E$ by
+\[
+B_E := \begin{bmatrix}
+    P_0 \varphi_1 & \hdots & P_0 \varphi_{N^\text{dof}} \\
+    (\nabla m_1, \nabla \varphi_1)_{0,E} & \hdots & (\nabla m_1, \nabla \varphi_{N^\text{dof}})_{0,E} \\
+    \vdots & \ddots & \vdots \\
+    (\nabla m_{n_k}, \nabla \varphi_1)_{0,E} & \hdots & (\nabla m_{n_k}, \nabla \varphi_{N^\text{dof}})_{0,E}
+\end{bmatrix},
+\]
+where $N^\text{dof}$ is the number of degrees of freedom per element.
+
+The projection operator $P_0$ is defined as
+\begin{equation}
+    P_0 v_h := \frac{1}{|E|} \int_E v_h \, dx, \quad \text{for } k \geq 2.
+\end{equation}
+
+The monomial basis functions $m_{\alpha}$ are defined by
+\begin{equation}
+    m_{\alpha_1,\alpha_2} := \left( \frac{x - x_{\mathcal{D}}}{h_{\mathcal{D}}} \right)^{\alpha_1}
+    \left( \frac{y - y_{\mathcal{D}}}{h_{\mathcal{D}}} \right)^{\alpha_2},
+\end{equation}
+and
+\begin{equation}
+    m_{\alpha} = \left( \frac{x - x_{\mathcal{D}}}{h_{\mathcal{D}}}, \frac{y - y_{\mathcal{D}}}{h_{\mathcal{D}}} \right),
+\end{equation}
+where $(x_{\mathcal{D}}, y_{\mathcal{D}})$ is the centroid of the element $E$, and $h_{\mathcal{D}}$ is a characteristic length scale.
+
+The matrix $D$ is given by
+\begin{equation}
+    D = \begin{pmatrix}
+        m_1^E(V_1) & m_x^E(V_1) & m_y^E(V_1) \\
+        \vdots & \vdots & \vdots \\
+        m_1^E(V_n) & m_x^E(V_n) & m_y^E(V_n) \\
+    \end{pmatrix},
+\end{equation}
+where $V_i$ are the vertices of the element $E$ and $m_{\alpha}^E(V_i)$ denotes the evaluation of the basis function $m_{\alpha}$ at vertex $V_i$.
+
+
+
+\end{document}

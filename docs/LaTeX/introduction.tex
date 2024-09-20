@@ -1,0 +1,16 @@
+\documentclass[class=article, crop=false]{standalone}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\section{Introduction}
+
+This paper discusses the Virtual Element Method (VEM), a numerical scheme for solving Poisson problems. VEM expands the functionality of Finite Element Methods (FEM) by allowing more general meshes, enabling it to handle more complicated geometries.
+
+Inspired by Mimetic Finite Differences (MFD), VEM introduces a finite element-like formulation. This innovation led Beirão et al. to name it the Virtual Element Method, due to its similarities to FEM \cite{beirao2013basic}. Unlike FEM, VEM does not require direct computation of the basis functions, and the stiffness matrices can be constructed without an explicit basis.
+
+This feature gives VEM the ability to handle arbitrarily shaped elements, offering greater flexibility for a wide range of applications. As a result, VEM has become a powerful tool for solving partial differential equations over highly unstructured and general meshes, making it suitable for replicating complex geometries.
+
+\end{document}
