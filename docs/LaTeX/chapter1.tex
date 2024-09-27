@@ -59,7 +59,7 @@ To derive the variational form of the Poisson problem, follow these steps:
     \item \textbf{Multiply by a Test Function and Integrate:}
     Multiply both sides of the equation by a test function $v \in H^1_0(\Omega)$ and integrate over $\Omega$:
     $$
-    \int_{\Omega} -\Delta u_0 \cdot v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx.
+    \int_{\Omega} -\Delta u_0 v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx.
     $$
     
     \item \textbf{Apply Integration by Parts:}
@@ -94,10 +94,10 @@ To derive the variational form of the Poisson problem, follow these steps:
         $$
         \item \textbf{Positive definite}: There exists a constant $\alpha > 0$ such that
         $$
-        a(v, v) \geq \alpha \|v\|_V^2 \quad \forall v \in H.
+        a(v, v) \geq \alpha \|v\|_H^2 \quad \forall v \in H.
         $$
     \end{itemize}
-    Let $L: H \rightarrow \mathbb{R}$ be a bounded linear functional. Then, there exists a unique $u \in V$ such that
+    Let $L: H \rightarrow \mathbb{R}$ be a bounded linear functional. Then, there exists a unique $u \in H$ such that
     $$
     a(u, v) = L(v) \quad \forall v \in H.
     $$
@@ -106,10 +106,10 @@ To derive the variational form of the Poisson problem, follow these steps:
 \subsubsection{Application to the Poisson Problem}
 Given $H^1_0(\Omega)$ is a Hilbert space $u_0$ has a unique solution because:
 \begin{itemize}
-    \item $|a(u_0,v)| \leq ||u_0||_{H^1_0{\Omega}} ||v||_{H^1_0{\Omega}} $ by the Cauchy-Schwarz inequality.\\
+    \item $|a(u_0,v)| \leq ||u_0||_{H^1_0(\Omega)} ||v||_{H^1_0(\Omega)} $ by the Cauchy-Schwarz inequality.\\
     Hence $a(u_0,v)$ is bounded.
 
-    \item $a(v,v) = \int_{\Omega}|\nabla v|^2\ dx = ||^2_{H_0^1(\Omega)} \geq \alpha||^2_{H_0^1(\Omega)}$,\\
+    \item $a(v,v) = \int_{\Omega}|\nabla v|^2\ dx = ||u_0||^2_{H_0^1(\Omega)} \geq ||\alpha||^2_{H_0^1(\Omega)}$,\\
     where $\alpha = 1.$ Thus showing $a(u_0,v)$ is positive definite.
 \end{itemize}
 
@@ -134,11 +134,11 @@ V_h := \left\{ v_h \in H^1_g(\Omega) \ \bigg| \ v_h|_E \in V_h^E \ \forall \, E 
 $$
 where $V_h^E$ denotes the local virtual element space on each element $E \in \mathcal{T}_h$. They must also have the following three properties:
 \begin{enumerate}
-    \item $V^E_h$ includes the space of $\mathcal{P}_E$ polynomials.
+    \item $V^E_h$ contains the space of $\mathcal{P}_E$ polynomials.
 
-    \item The functions in $V^E_h$ are uniquely defined by the vertices and the$\operatorname{dim}(V^E_h) = N^E.$
+    \item The functions in $V^E_h$ are uniquely determined by the degrees of freedom(DOFs) by the vertices. %and the $\operatorname{dim}(V^E_h) = N^E.$
 
-    \item All functions in $V^E_h$ are linear on the edges of the space.
+    \item All functions in $V^E_h$ are continuous across element boundaries.
 \end{enumerate}
 \cite{sutton2017virtual}
 
@@ -146,21 +146,14 @@ where $V_h^E$ denotes the local virtual element space on each element $E \in \ma
 \subsection{Basis Functions}
 Let $\{\varphi_i^E\}_{i=1}^{N_E} \subset V_h$ be the set of orthonormal basis functions for the local virtual element spaces. Where $\phi_i(v_j) = \phi_{ij}.$
 
-One of the strengths of VEM is they do not need to be explicitly defined. However for the purposes of this paper the basis functions can be constructed using associated Lagrangian polynomials for the nodes of the mesh. Specifically, for each basis function $\varphi_i$, we have
-$$
-\varphi_i(\mathbf{x}) = \prod_{k=1}^{n} l_{ik}(x_k),
-$$
-where:
-\begin{itemize}
-    \item $\mathbf{x} = (x_1, x_2, \ldots, x_n)$ represents the coordinates in $n$-dimensional space.
-    \item $l_{ik}(x_k)$ is the $k$-th one-dimensional Lagrange polynomial associated with the $i$-th basis function along the $k$-th coordinate direction.
-\end{itemize}
+One of the strengths of VEM is they do not need to be explicitly defined. However for the simple 2d case in this paper a Lagrangian basis will be used.
 
 \subsubsection{Polynomial Basis}
 Additionally, we need a basis for the polynomial space $\mathcal{P}_E$. There are many possible basis functions. Although we will stick to just the scaled monimal basis.
 \begin{equation}
     \mathcal{M}_E = \left(\cfrac{\mathbf{x} - \mathbf{x}_{\mathcal{D}}}{h_{\mathcal{D}}}\right)^{\alpha}
 \end{equation}
+where $X_{\mathcal{D}}$ and $h_{\mathcal{D}}$ are the centroid and diameter of the element respectively.
 
 For 2-dimensions:
 \begin{equation}
@@ -178,7 +171,7 @@ The degrees of freedom can be of the following forms:
     
     \item For $\mathcal{P}_2$ the DOFs are the vertices:
     $$\text{DOFs for } \mathcal{P}_2: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e}$$
-    where $E_j$ is the midpoint of $j$-th edge and $N_e$ is the number of edges.
+    where $E_j$ is the midpoint or edge moment of $j$-th edge and $N_e$ is the number of edges.
     
     \item For $\mathcal{P}_k$ the DOFs are the vertices:
     $$\text{DOFs for } \mathcal{P}_k: \quad \{ u(V_i) \}_{i=1}^{N_v} \cup \{ u(E_j) \}_{j=1}^{N_e} \cup \{ m_l(u) \}_{l=1}^{N_m}$$
@@ -288,7 +281,5 @@ The matrix $D$ is given by
     \end{pmatrix},
 \end{equation}
 where $V_i$ are the vertices of the element $E$ and $m_{\alpha}^E(V_i)$ denotes the evaluation of the basis function $m_{\alpha}$ at vertex $V_i$.
-
-
 
 \end{document}
