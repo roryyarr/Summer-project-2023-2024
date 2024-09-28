@@ -12,6 +12,11 @@
 
 This section details a worked solution of the non-homogeneous Poisson problem on a simple mesh, to illustrate the Virtual Element Method.
 
+$\left{\begin{array}{rl}
+    -\Delta u(x,y) &= 2\pi^2\sin(\pi x)\sin(\pi y)\\
+    u(x,y) &= \sin(\pi x)\sin(\pi y)
+\end{array}\right$
+
 \subsection{Mesh Definition}
 
 \begin{figure}[ht!]
@@ -149,11 +154,44 @@ Note the denominator is 1 and the same is true for the rest so they can be writt
 \end{enumerate}
 
 
-% \subsubsection{Inner Products $(\nabla m_i^1, \nabla\varphi_j)_{E_1}$}
-% \begin{align*}
-%     (\nabla_x^1,\nabla\varphi_1)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_1 \,dydx \\
-%     & \int_\frac{1}{2}^\frac{3}{2} \left(\frac{1}{2},0\right)\cdot () \\
-% \end{align*}
+\subsubsection{$P_0\varphi_i$}
+
+$P_0\varphi_1 = \cfrac{1}{|E_1|}\int_{E_1}\varphi_i \,dydx = \frac{1}{2}\times\frac{1}{2}$
+
+
+\begin{multicols}{2}
+\begin{enumerate}
+$
+P_0\varphi_0 = \iint_E(\frac{3}{2} - x)(1+\sqrt{3}-y)dxdy \\
+\hspace*{22pt}= \int_{\frac{1}{2}}^{\frac{3}{2}}(\frac{3}{2} - x)dx \int_{\sqrt{3}}^{1+\sqrt{3}}(1+\sqrt{3}-y)dy\\
+\hspace*{22pt}= \frac{1}{4}[3x-x^2]_{\frac{1}{2}}^{\frac{3}{2}}[2(1+\sqrt{3})x - x^2]_{\sqrt{3}}^{1+\sqrt{3}}\\
+\hspace*{22pt}= \frac{1}{4}(9/2-9/4 - 3/2+1/4)(2(1+\sqrt{3})(1+\sqrt{3})\\
+\hspace*{22pt}= \frac{1}{4}(1)(1)$
+\end{enumerate}
+\end{multicols}
+
+\subsubsection{Inner Products $(\nabla m_i^1, \nabla\varphi_j)_{E_1}$}
+\begin{enumerate}
+    \item \begin{align*}
+        (\nabla_x^1,\nabla\varphi_1)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_1 \,dydx \\
+        & \int_{\frac{1}{2}}^\frac{3}{2}\int_{\sqrt{3}}^{\sqrt{3}+1} \left(\frac{1}{2},0\right)\cdot \left(-\left(1 + \sqrt{3} - y\right),  -\left(\frac{3}{2}-x\right)\right) \,dydy \\
+    \end{align*}
+
+    \item \begin{align*}
+        (\nabla m_x^1,\nabla\varphi_2)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_2 \,dydx \\
+        & \int_{\frac{1}{2}}^\frac{3}{2}\int_{\sqrt{3}}^{\sqrt{3}+1} \left(\frac{1}{2},0\right)\cdot \left(-\left(1 + \sqrt{3} - y\right),  -\left(\frac{3}{2}-x\right)\right) \,dydy \\
+    \end{align*}
+
+    \item \begin{align*}
+        (\nabla m_x^1,\nabla\varphi_2)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_2 \,dydx \\
+        & \int_{\frac{1}{2}}^\frac{3}{2}\int_{\sqrt{3}}^{\sqrt{3}+1} \left(\frac{1}{2},0\right)\cdot \left(-\left(1 + \sqrt{3} - y\right),  -\left(\frac{3}{2}-x\right)\right) \,dydy \\
+    \end{align*}
+
+    \item \begin{align*}
+        (\nabla m_x^1,\nabla\varphi_4)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_4 \,dydx \\
+        & \int_{\frac{1}{2}}^\frac{3}{2}\int_{\sqrt{3}}^{\sqrt{3}+1} \left(\frac{1}{2},0\right)\cdot \left(-\left(1 + \sqrt{3} - y\right),  -\left(\frac{3}{2}-x\right)\right) \,dydy \\
+    \end{align*}
+\end{enumerate}
 
 
 \subsubsection{$(\nabla m_x,\nabla\phi)$}
@@ -194,32 +232,64 @@ $(\nabla m_y^1,\nabla\phi_3)_{E_1} =
 \frac{1}{\sqrt{2}}$\\
 
 \subsubsection{B$_1$ Matrix}
-$B_1 = \frac{1}{4}\begin{pmatrix}
+Next the $B_1$ matrix can be constructed.\\
+$B_1 = \begin{pmatrix}
+    P_0\varphi_1 & P_0\varphi_2 & P_0\varphi_3 & P_0\varphi_4\\
+    (\nabla m_x^1,\nabla\phi_1)_{E_1} & (\nabla m_x^1,\nabla\phi_2)_{E_1} & (\nabla m_x^1,\nabla\phi_3)_{E_1} & (\nabla m_x^1,\nabla\phi_4)_{E_1}\\
+    (\nabla m_y^1,\nabla\phi_1)_{E_1} & (\nabla m_y^1,\nabla\phi_2)_{E_1} & (\nabla m_y^1,\nabla\phi_3)_{E_1} & (\nabla m_y^1,\nabla\phi_4)_{E_1}\\
+\end{pmatrix} =
+\frac{1}{4}\begin{pmatrix}
     1 & 1 & 1 & 1 \\
-    -d & 1 & -1 & 1\\
-    -1 & -1 & 1 & 1 
+    -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}\\
+    -\frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}
 \end{pmatrix}$
 
 \subsubsection{G Matrix}
-$G_1 = \begin{pmatrix}
-    1
-\end{pmatrix}
+\begin{align*}
+    G_1 =& BD =\cfrac{1}{\sqrt{2}}\frac{1}{4}
+    \begin{pmatrix}
+        1 & 1 & 1 & 1 \\
+        -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}\\
+        -\frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}
+    \end{pmatrix}\begin{pmatrix}
+        \sqrt{2} & -1 & -1\\
+        \sqrt{2} & 1 & -1\\
+        \sqrt{2} & 1 & 1\\
+        \sqrt{2} & -1 & 1\\
+    \end{pmatrix}\\
+    =& \begin{pmatrix}
+        1 & 0 & 1 \\
+        0 & 1 & 1 \\
+        0 & 0 & 1 \\
+    \end{pmatrix}
+\end{align*}
+
+\subsection{Calculations for the Element E$_2$.}
+
+\subsubsection{Element Geometry}
+\begin{itemize}
+    \item The centriod $x_{E_2} = (\frac{1}{2}, \frac{1}{2}).$
+    \item The diameter $ h_{E_2} = \sqrt{2}$
+    \item The area $|E_2| = 1$.
+\end{itemize}
+
+
+\subsubsection{Monomial Basis Functions}
+$
+\noindent\hspace*{25pt} m_1^2 = 1\\
+\hspace*{25pt} m_x^2 = \cfrac{x-1}{2}\\
+\hspace*{25pt} m_y^2 = \cfrac{y-1}{2}
 $
 
-\subsection{E$_2$}
-For $E_1$ the square the coordinates of the centriod are, $x_{E_2} = (1,1).$ The diameter is, $ h_{E_1} = 2$ and the area is $|E_1| = \frac{3\sqrt{3}}{2}$.\\
-\\
-For $m_1^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{0} = 1$\\
-For $m_x^2 = \left(\cfrac{x - 1}{2}\right)^{1}\left(\cfrac{y - 1}{2}\right)^{0} = \cfrac{(x-1)}{2}$\\
-For $m_y^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{1} = \cfrac{y-1}{2}$\\
-
-\subsubsection{Monimals}
+\subsubsection{DOFs for E$_2$}
 $\begin{array}{ll}
 m_x^2|_{x=0}\hspace{1.5pt} = \cfrac{0-1}{2} = -\frac{1}{2} &\qquad m_y^2|_{y=0} \hspace{7pt}= \cfrac{0-1}{2} = -\frac{1}{2} \\
 m_x^2|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2}-1}{2} = -\frac{1}{4} &\qquad m_y^2|_{y=\frac{\sqrt{3}}{2}} = \cfrac{\frac{\sqrt{3}}{2}-1}{2} = \frac{\sqrt{3}-2}{4} \\
 m_x^2|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2}-1}{2} = \frac{1}{4} &\qquad m_y^2|_{y=\sqrt{3}}\, = \cfrac{\sqrt{3}-1}{2} = \frac{\sqrt{3}-1}{2} \\
 m_x^2|_{x=2}\hspace{1.5pt} = \cfrac{2-1}{2} = \frac{1}{2} &
 \end{array}$
+
+\subsubsection{D Matrix}
 
 $D_2 = \cfrac{1}{4}\begin{pmatrix}
     4 & -1 & - 2\\
@@ -237,5 +307,34 @@ $\nabla m_y^2 = (0,\frac{1}{2})$ \\
 
 Hence, \\
 $P_0m_1 = \int_E\frac{1}{E}$
+
+
+
+% \subsubsection{}
+
+\section{Exact Solution}
+
+Suppose the solution is the form of $u(x,y) = A\sin(\pi x)\sin(\pi y)$\\
+\begin{enumerate}
+    \item $\Delta u(x,y) = \cfrac{\partial^2 u}{\partial x^2} + \cfrac{\partial^2 u}{\partial y^2}$
+    \item where: $\cfrac{\partial^2 u}{\partial x^2} = -A\pi^2\sin(\pi x)\sin(\pi y)$
+    \item and: $\cfrac{\partial^2 u}{\partial x^2} = -A\pi^2\sin(\pi x)\sin(\pi y)$
+    Hence $\Delta u(x,y) = -2A\pi^2\sin(\pi x)\sin(\pi y)$
+    \item Substituting the Poisson equation: $2A\pi^2\sin(\pi x)\sin(\pi y) = 2\pi^2\sin(\pi x)\sin(\pi y)$
+    \item Hence A = 1
+\end{enumerate}
+
+\subsection{Solution at vertices}
+
+\begin{enumerate}
+    \item $u(1/2,0) = 0$
+    \item $(3/2,0) = 0$
+    \item $(2,\sqrt{3}/2) = 0$
+    \item $(3/2,\sqrt{3}) = \sin(3/2\pi)\sin(\sqrt{3}\pi) = 0.746$
+    \item $(3/2,1+\sqrt{3}) = \sin({3\pi/2})\sin(1+\sqrt{3}) = -0.398$
+    \item $(1/2,1+\sqrt{3}) = \sin(\pi/2)\sin(1+\sqrt{3}) = 0.398$
+    \item $(1/2,\sqrt{3}) = \sin(\pi/2)\sin(1+\sqrt{3}) = -0.746$
+    \item $(0, \sqrt{3}/2) = 0$
+\end{enumerate}
 
 \end{document}
