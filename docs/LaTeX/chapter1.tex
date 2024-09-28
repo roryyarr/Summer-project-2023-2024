@@ -230,7 +230,7 @@ The global stiffness matrix $K$ is then assembled by summing the contributions f
 \subsection{Load Vector $F$}
 The local load vector $F^E$ for each element $E \in \mathcal{T}_h$ is defined by
 \[
-F^E_i = \int_E f \varphi_i \, dE.
+F^E_i = \int_E f \varphi_i \, dE + \int_E \Delta\tilde{g} \varphi_i \, dE.
 \]
 The global load vector $F$ is obtained by assembling the local contributions:
 \begin{equation}
@@ -261,23 +261,21 @@ The projection operator $P_0$ is defined as
     P_0 v_h := \frac{1}{|E|} \int_E v_h \, dx, \quad \text{for } k \geq 2.
 \end{equation}
 
-The monomial basis functions $m_{\alpha}$ are defined by
-\begin{equation}
-    m_{\alpha_1,\alpha_2} := \left( \frac{x - x_{\mathcal{D}}}{h_{\mathcal{D}}} \right)^{\alpha_1}
-    \left( \frac{y - y_{\mathcal{D}}}{h_{\mathcal{D}}} \right)^{\alpha_2},
-\end{equation}
-and
-\begin{equation}
-    m_{\alpha} = \left( \frac{x - x_{\mathcal{D}}}{h_{\mathcal{D}}}, \frac{y - y_{\mathcal{D}}}{h_{\mathcal{D}}} \right),
-\end{equation}
 where $(x_{\mathcal{D}}, y_{\mathcal{D}})$ is the centroid of the element $E$, and $h_{\mathcal{D}}$ is a characteristic length scale.
 
 The matrix $D$ is given by
 \begin{equation}
     D = \begin{pmatrix}
-        m_1^E(V_1) & m_x^E(V_1) & m_y^E(V_1) \\
-        \vdots & \vdots & \vdots \\
-        m_1^E(V_n) & m_x^E(V_n) & m_y^E(V_n) \\
+        m_1^E(V_1) & m_{x_1}^E(V_1) & \cdots& m_{x_{n-1}}^E(V_1) \\
+        \vdots & \vdots & & \vdots \\
+        m_1^E(V_n) & m_{x_1}^E(V_n) & \cdots & m_{x_{n-1}}^E(V_n) \\
+    \end{pmatrix},
+\end{equation}
+\begin{equation}
+    D = \begin{pmatrix}
+        m_1^E(V_1) & m_{\vec{X}}^E(V_1) \\
+        \vdots &  \vdots \\
+        m_1^E(V_n) & m_{\vec{X}}^E(V_n) \\
     \end{pmatrix},
 \end{equation}
 where $V_i$ are the vertices of the element $E$ and $m_{\alpha}^E(V_i)$ denotes the evaluation of the basis function $m_{\alpha}$ at vertex $V_i$.

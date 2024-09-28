@@ -539,4 +539,372 @@ F. Brezzi, K. Lipnikov, and M. Shashkov,
 
 \end{thebibliography}
 
+\newpage
+
+\section{Theory}
+
+\subsection{The Poisson Problem}
+
+The non-homogeneous Poisson problem is defined as:
+\begin{align}
+    -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
+    u &= g \quad \text{on } \partial \Omega, \label{eq:dirichlet}
+\end{align}
+where:
+\begin{itemize}
+    \item $\Omega \subset \mathbb{R}^n$ is a bounded domain.
+    \item $\partial\Omega$ is the boundary of $\Omega$, assumed to be Lipschitz continuous.
+    \item $f \in L^2(\Omega)$ represents the source term.
+    \item $g \in H^{1/2}(\partial\Omega)$ is the prescribed boundary function.
+    \item $u$ is the unknown solution function.
+\end{itemize}
+
+We aim to extend the standard Virtual Element Method (VEM) approach, as presented in the Hitchhiker's Guide to the Virtual Element Method \cite{beirao2014hitchhiker}, to handle the non-homogeneous Dirichlet boundary condition given in \eqref{eq:dirichlet}.
+
+\subsection{Variational Formulation}
+
+To derive the variational formulation suitable for the VEM, we proceed as follows:
+
+\begin{enumerate}
+    \item \textbf{Define the Sobolev Spaces:}
+
+    The space of functions satisfying the Dirichlet boundary condition is:
+    \[
+    H^1_g(\Omega) = \left\{ v \in H^1(\Omega) \ \big| \ v = g \text{ on } \partial\Omega \right\}.
+    \]
+    The corresponding homogeneous space is:
+    \[
+    H^1_0(\Omega) = \left\{ v \in H^1(\Omega) \ \big| \ v = 0 \text{ on } \partial\Omega \right\}.
+    \]
+
+    \item \textbf{Decompose the Solution:}
+
+    We decompose the solution $u$ into a homogeneous part $u_0$ and an extension $\tilde{g}$ of the boundary data:
+    \[
+    u = u_0 + \tilde{g},
+    \]
+    where $\tilde{g} \in H^1(\Omega)$ satisfies $\tilde{g}|_{\partial\Omega} = g$.
+
+    \item \textbf{Substitute into the Poisson Equation:}
+
+    Substituting $u = u_0 + \tilde{g}$ into \eqref{eq:poisson} yields:
+    \[
+    -\Delta (u_0 + \tilde{g}) = f \quad \text{in } \Omega.
+    \]
+    Rearranging, we obtain:
+    \[
+    -\Delta u_0 = f + \Delta \tilde{g} \quad \text{in } \Omega.
+    \]
+
+    \item \textbf{Variational Formulation:}
+
+    We seek $u_0 \in H^1_0(\Omega)$ such that:
+    \begin{equation}
+        \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx = \int_{\Omega} (f + \Delta \tilde{g}) v \, dx \quad \forall v \in H^1_0(\Omega).
+        \label{eq:variational}
+    \end{equation}
+    This formulation arises from multiplying both sides of $-\Delta u_0 = f + \Delta \tilde{g}$ by $v \in H^1_0(\Omega)$ and integrating over $\Omega$, followed by applying integration by parts. The boundary terms vanish due to $v = 0$ on $\partial\Omega$.
+\end{enumerate}
+
+\subsection{Existence and Uniqueness of the Solution}
+
+\subsubsection{Lax-Milgram Theorem}
+
+\begin{theorem}[Lax-Milgram]
+    Let $V$ be a real Hilbert space, and let $a(u,v)$ be a bilinear form that is:
+    \begin{itemize}
+        \item \textbf{Bounded}: There exists a constant $C > 0$ such that
+        \[
+        |a(u, v)| \leq C \|u\|_V \|v\|_V \quad \forall u, v \in V.
+        \]
+        \item \textbf{Coercive}: There exists a constant $\alpha > 0$ such that
+        \[
+        a(v, v) \geq \alpha \|v\|_V^2 \quad \forall v \in V.
+        \]
+    \end{itemize}
+    Let $L: V \rightarrow \mathbb{R}$ be a bounded linear functional. Then, there exists a unique $u \in V$ such that
+    \[
+    a(u, v) = L(v) \quad \forall v \in V.
+    \]
+\end{theorem}
+
+\subsubsection{Application to the Poisson Problem}
+
+We apply the Lax-Milgram theorem to show that there exists a unique solution $u_0 \in H^1_0(\Omega)$ to the variational problem \eqref{eq:variational}.
+
+\begin{itemize}
+    \item \textbf{Define the Bilinear Form and Functional:}
+
+    The bilinear form $a(u_0, v)$ is given by:
+    \[
+    a(u_0, v) = \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx.
+    \]
+    The linear functional $L(v)$ is:
+    \[
+    L(v) = \int_{\Omega} (f + \Delta \tilde{g}) v \, dx.
+    \]
+
+    \item \textbf{Boundedness of the Bilinear Form:}
+
+    Using the Cauchy-Schwarz inequality:
+    \[
+    |a(u_0, v)| = \left| \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx \right| \leq \|\nabla u_0\|_{L^2(\Omega)} \|\nabla v\|_{L^2(\Omega)} = \|u_0\|_{H^1_0(\Omega)} \|v\|_{H^1_0(\Omega)}.
+    \]
+    Therefore, $a(u_0, v)$ is bounded with $C = 1$.
+
+    \item \textbf{Coercivity of the Bilinear Form:}
+
+    We have:
+    \[
+    a(v, v) = \int_{\Omega} |\nabla v|^2 \, dx = \|v\|_{H^1_0(\Omega)}^2.
+    \]
+    Thus, $a(v, v) \geq \alpha \|v\|_{H^1_0(\Omega)}^2$ with $\alpha = 1$.
+
+    \item \textbf{Boundedness of the Linear Functional:}
+
+    Since $f + \Delta \tilde{g} \in L^2(\Omega)$ (assuming $\tilde{g} \in H^2(\Omega)$), we have:
+    \[
+    |L(v)| \leq \|f + \Delta \tilde{g}\|_{L^2(\Omega)} \|v\|_{L^2(\Omega)} \leq C' \|v\|_{H^1_0(\Omega)},
+    \]
+    where we used the Poincaré inequality for $v \in H^1_0(\Omega)$.
+
+    \item \textbf{Conclusion:}
+
+    By the Lax-Milgram theorem, there exists a unique $u_0 \in H^1_0(\Omega)$ satisfying \eqref{eq:variational}.
+\end{itemize}
+
+\subsection{Discrete Bilinear Form}
+
+In the Virtual Element Method, we define the local and global bilinear forms to approximate the continuous variational problem.
+
+\subsubsection{Local Bilinear Form}
+
+For each element $E$ in the mesh $\mathcal{T}_h$, the local bilinear form $a^E: V_h^E \times V_h^E \rightarrow \mathbb{R}$ is defined by:
+\[
+a^E(u_h, v_h) = \int_E \nabla u_h \cdot \nabla v_h \, dx.
+\]
+However, since the exact gradients of $u_h$ and $v_h$ are not explicitly known (due to the implicit nature of VEM basis functions), we approximate this bilinear form using projections onto polynomial spaces.
+
+\subsubsection{Global Bilinear Form}
+
+The global bilinear form is assembled by summing the local contributions:
+\[
+a^h(u_h, v_h) = \sum_{E \in \mathcal{T}_h} a^E(u_h, v_h).
+\]
+
+\subsection{Virtual Element Space}
+
+Let $\mathcal{T}_h$ be a conforming mesh of the domain $\Omega$ into general polygons (in 2D) or polyhedra (in 3D). The virtual element space is defined as:
+\[
+V_h^g = \left\{ v_h \in H^1_g(\Omega) \ \big| \ v_h|_E \in V_h^E \ \forall E \in \mathcal{T}_h \right\},
+\]
+where $V_h^E$ is the local virtual element space on element $E$. Similarly, we define the homogeneous space:
+\[
+V_h^0 = \left\{ v_h \in H^1_0(\Omega) \ \big| \ v_h|_E \in V_h^E \ \forall E \in \mathcal{T}_h \right\}.
+\]
+
+The local virtual element space $V_h^E$ is constructed to satisfy the following properties \cite{beirao2014hitchhiker}:
+\begin{enumerate}
+    \item \textbf{Polynomial Reproduction:} $V_h^E$ contains the space $\mathcal{P}_k(E)$ of polynomials of degree up to $k$ on $E$.
+    \item \textbf{Unisolvent Degrees of Freedom (DoFs):} The functions in $V_h^E$ are uniquely determined by a set of DoFs.
+    \item \textbf{Computability:} The projection operators and bilinear forms can be computed using only the DoFs.
+\end{enumerate}
+
+\subsection{Degrees of Freedom}
+
+For a $k$-th order VEM ($k \geq 1$), the DoFs per element are:
+
+\begin{itemize}
+    \item \textbf{Vertex Values:} For each vertex $V_i$ of the element $E$, the value $v_h(V_i)$.
+    \item \textbf{Edge Moments:} For each edge $e \subset \partial E$, moments of $v_h$ against monomials of degree up to $k-2$:
+    \[
+    \frac{1}{|e|} \int_e v_h m \, ds, \quad \forall m \in \mathcal{M}_{k-2}(e).
+    \]
+    \item \textbf{Internal Moments:} Moments over the element $E$ against monomials of degree up to $k-2$:
+    \[
+    \frac{1}{|E|} \int_E v_h m \, dx, \quad \forall m \in \mathcal{M}_{k-2}(E).
+    \]
+\end{itemize}
+
+For $k = 1$, only vertex values are used as DoFs. For higher-order methods ($k \geq 2$), edge and internal moments are included.
+
+\subsection{Projection Operators}
+
+\subsubsection{Elliptic Projection}
+
+The elliptic (or energy) projection operator $\Pi^\nabla: V_h^E \rightarrow \mathcal{P}_k(E)$ is defined for each element $E \in \mathcal{T}_h$ by:
+\begin{equation}
+    (\nabla \Pi^\nabla v_h, \nabla p)_{0,E} = (\nabla v_h, \nabla p)_{0,E} \quad \forall p \in \mathcal{P}_k(E).
+    \label{eq:elliptic_projection}
+\end{equation}
+Additionally, for $k > 1$, the projection satisfies:
+\begin{equation}
+    (\Pi^\nabla v_h, 1)_E = (v_h, 1)_E.
+    \label{eq:projection_mean}
+\end{equation}
+
+\subsubsection{Computation of the Projection}
+
+While the basis functions are not explicitly known, the projection $\Pi^\nabla v_h$ can be computed using the DoFs:
+
+\begin{itemize}
+    \item The right-hand side of \eqref{eq:elliptic_projection}, $(\nabla v_h, \nabla p)_{0,E}$, can be computed using the DoFs.
+    \item The left-hand side involves known polynomials, so $(\nabla \Pi^\nabla v_h, \nabla p)_{0,E}$ can be expressed in terms of the coefficients of $\Pi^\nabla v_h$.
+    \item Solving the resulting linear system yields the coefficients of $\Pi^\nabla v_h$ in the polynomial basis.
+\end{itemize}
+
+\subsection{Stiffness Matrix Assembly}
+
+The local stiffness matrix $K^E$ for each element $E$ is constructed as:
+
+\[
+K^E = K^{\nabla, E} + K^{S, E},
+\]
+where:
+
+\begin{itemize}
+    \item \textbf{Consistency Term:}
+    \[
+    K^{\nabla, E}_{ij} = (\nabla \Pi^\nabla \varphi_i, \nabla \Pi^\nabla \varphi_j)_E.
+    \]
+    \item \textbf{Stabilization Term:}
+    \[
+    K^{S, E}_{ij} = S^E\left( \varphi_i - \Pi^\nabla \varphi_i, \varphi_j - \Pi^\nabla \varphi_j \right),
+    \]
+    where $S^E(\cdot,\cdot)$ is a symmetric and positive definite bilinear form ensuring stability.
+\end{itemize}
+
+\subsubsection{Consistency Term}
+
+The consistency term approximates the bilinear form using the projected functions. Since $\Pi^\nabla \varphi_i \in \mathcal{P}_k(E)$, their gradients are known, and the integral can be computed exactly or approximated using numerical quadrature.
+
+\subsubsection{Stabilization Term}
+
+The stabilization term compensates for the components not captured by the projection. A simple choice for $S^E$ is:
+
+\[
+S^E(u, v) = \gamma_E \sum_{\text{DoFs}} \text{DoF}_i(u) \cdot \text{DoF}_i(v),
+\]
+where $\gamma_E$ is a positive scaling factor (e.g., $\gamma_E = 1$).
+
+\subsection{Load Vector Assembly}
+
+The local load vector $F^E$ for each element $E$ is defined by:
+
+\[
+F^E_i = \int_E f \varphi_i \, dx.
+\]
+
+Since the basis functions $\varphi_i$ are not explicitly known, we approximate $F^E_i$ using the projection:
+
+\[
+F^E_i \approx \int_E f \Pi^0 \varphi_i \, dx,
+\]
+where $\Pi^0 \varphi_i$ is the $L^2$ projection onto $\mathcal{P}_k(E)$, computable via the DoFs.
+
+\subsection{Incorporating Non-Homogeneous Boundary Conditions}
+
+To handle the non-homogeneous Dirichlet boundary condition, we proceed as follows:
+
+\begin{itemize}
+    \item \textbf{Approximate the Boundary Data:}
+
+    Define $g_h$ as an approximation of $g$ in $V_h^g$, satisfying $g_h|_{\partial\Omega} = g$ at the DoFs on $\partial\Omega$.
+
+    \item \textbf{Decompose the Discrete Solution:}
+
+    Write the discrete solution as:
+    \[
+    u_h = u_h^0 + g_h,
+    \]
+    where $u_h^0 \in V_h^0$ satisfies homogeneous boundary conditions.
+
+    \item \textbf{Modify the Right-Hand Side:}
+
+    The variational problem becomes: Find $u_h^0 \in V_h^0$ such that:
+    \[
+    a^h(u_h^0, v_h) = F(v_h) - a^h(g_h, v_h) \quad \forall v_h \in V_h^0,
+    \]
+    where:
+    \[
+    F(v_h) = \int_{\Omega} f v_h \, dx.
+    \]
+    The term $a^h(g_h, v_h)$ accounts for the known boundary data.
+
+    \item \textbf{Assemble the Modified Load Vector:}
+
+    Compute the modified load vector:
+    \[
+    \tilde{F}_i = F_i - \sum_{j} K_{ij} g_{h,j},
+    \]
+    where $g_{h,j}$ are the coefficients of $g_h$ at the DoFs.
+\end{itemize}
+
+\subsection{Implementation Summary}
+
+The steps to implement the VEM for the non-homogeneous Poisson problem are:
+
+\begin{enumerate}
+    \item \textbf{Mesh Generation:} Create a mesh $\mathcal{T}_h$ of the domain $\Omega$.
+
+    \item \textbf{Virtual Element Space Construction:} For each element $E$, define the local space $V_h^E$ and identify the DoFs.
+
+    \item \textbf{Approximate Boundary Data:} Construct $g_h$ by assigning the boundary values of $g$ to the boundary DoFs.
+
+    \item \textbf{Compute Projection Operators:} For each element, compute the projections $\Pi^\nabla v_h$ for the basis functions.
+
+    \item \textbf{Assemble Stiffness Matrix and Load Vector:} Use the projections and DoFs to assemble $K^E$ and $F^E$ for each element.
+
+    \item \textbf{Modify Load Vector for Boundary Conditions:} Adjust the load vector to account for $g_h$.
+
+    \item \textbf{Solve the Linear System:} Solve for $u_h^0$ in the assembled system:
+    \[
+    K u_h^0 = \tilde{F}.
+    \]
+
+    \item \textbf{Recover the Full Solution:} Compute $u_h = u_h^0 + g_h$.
+\end{enumerate}
+
+\subsection{Polynomial Basis Functions}
+
+We utilize scaled monomial basis functions for the polynomial space $\mathcal{P}_k(E)$. For 2D elements centered at $\mathbf{x}_E$ with characteristic length $h_E$, the monomials are:
+
+\[
+m_{\alpha}(x, y) = \left( \frac{x - x_E}{h_E} \right)^{\alpha_1} \left( \frac{y - y_E}{h_E} \right)^{\alpha_2}, \quad |\alpha| = \alpha_1 + \alpha_2 \leq k.
+\]
+
+These monomials form a basis for $\mathcal{P}_k(E)$ and are used in computing projections and assembling matrices.
+
+\subsection{Example: Linear VEM ($k = 1$)}
+
+For the lowest-order case ($k = 1$), the implementation simplifies:
+
+\begin{itemize}
+    \item \textbf{Degrees of Freedom:} Only vertex values are used.
+    \item \textbf{Projection Operator:} The projection $\Pi^\nabla v_h$ maps $v_h$ to a constant function on $E$.
+    \item \textbf{Stabilization Term:} The stabilization can be a multiple of the element mass matrix.
+    \item \textbf{Boundary Conditions:} Boundary vertex values are set to match $g$.
+\end{itemize}
+
+\subsection{Conclusion}
+
+By extending the standard VEM approach to include non-homogeneous Dirichlet boundary conditions, we can solve the non-homogeneous Poisson problem effectively. The key modifications involve decomposing the solution, adjusting the virtual element spaces, and properly incorporating the boundary data into the variational formulation and assembly process.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+% In the references.bib file, you would include:
+
+% @article{beirao2014hitchhiker,
+%   title={A hitchhiker's guide to the virtual element method},
+%   author={Beir{\~a}o da Veiga, Louren{\c{c}}o and Brezzi, Franco and Cangiani, Andrea and Manzini, Gianmarco and Marini, L Donatella and Russo, Alessandro},
+%   journal={Mathematical Models and Methods in Applied Sciences},
+%   volume={24},
+%   number={08},
+%   pages={1541--1573},
+%   year={2014},
+%   publisher={World Scientific}
+% }
+
+
 \end{document}

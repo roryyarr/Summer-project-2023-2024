@@ -1,0 +1,241 @@
+\documentclass{article}
+\usepackage{vem-preamble}
+
+
+
+\begin{document}
+% diagramm
+\include{docs/LaTeX/diagram}
+
+\section{Example Calculation}
+
+
+This section details a worked solution of the non-homogeneous Poisson problem on a simple mesh, to illustrate the Virtual Element Method.
+
+\subsection{Mesh Definition}
+
+\begin{figure}[ht!]
+    \centering
+    % Call the custom command with desired scale, e.g., 3
+    \MeshDiagram{2};
+    \caption{Diagram showing $E_1$ and $E_2$ with labeled vertices.}
+    \label{docs/LaTeX/diagram}
+\end{figure}
+
+
+\include{docs/LaTeX/diagram}
+
+Consider a mesh consisting of two elements in $\mathbb{R}^2$:
+
+\begin{itemize}
+    \item \textbf{Element $E_1$}: A square with vertices labeled in counterclockwise order.
+    \item \textbf{Element $E_2$}: A hexagon with vertices labeled in counterclockwise order.
+\end{itemize}
+
+The coordinates of the vertices are as follows:
+
+$$E_1 = \begin{cases}
+    V_1 = (\frac{1}{2},\sqrt{3}) \\
+    V_2 = (\frac{3}{2},\sqrt{3}) \\
+    V_3 = (\frac{3}{2},1+\sqrt{3}) \\ 
+    V_4 = (\frac{1}{2},1+\sqrt{3}) \\
+\end{cases}
+\quad
+E_2 = \begin{cases}
+    V_1 = (\frac{1}{2},0) \\ 
+    V_2 = (\frac{3}{2},0) \\ 
+    V_3 = (2,\frac{\sqrt{3}}{2}) \\
+    V_4 = (\frac{3}{2},\sqrt{3}) \\
+    V_5 = (\frac{1}{2}, \sqrt{3}) \\ 
+    V_6 = (0, \frac{\sqrt{3}}{2}) \\
+\end{cases}$$\\
+
+\subsection{Caluculations for Element E$_1$}
+
+\subsubsection{Element Geometry}
+\begin{itemize}
+    \item The centriod $x_{E_1} = (1, \frac{1}{2}+\sqrt{3}).$
+    \item The diameter is, $ h_{E_1} = \sqrt{2}$
+    \item area is $|E_1| = 1$.
+\end{itemize}
+
+\subsubsection{Momonial basis}
+
+\begin{enumerate}
+    \item $m_1^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = 1$
+    
+    \item $m_x^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{1}\left(\cfrac{y -\frac{1}{2} - \sqrt{3}}{\sqrt{2}}\right)^{0} = \cfrac{x - 1}{\sqrt{2}}$
+
+    \item $m_y^1 = \left(\cfrac{x - 1}{\sqrt{2}}\right)^{0}\left(\cfrac{y -(\sqrt{3} +\frac{1}{2})}{\sqrt{2}}\right)^{1} = \cfrac{y - \frac{1}{2} - \sqrt{3}}{\sqrt{2}}$
+\end{enumerate}
+
+
+\subsubsection{DOF}
+
+
+
+\begin{multicols}{2}
+\begin{enumerate}
+    \item At $V_1 = \left(\frac{1}{2},\sqrt{3}\right):$
+    \begin{align*}
+    m_x^1(V_1) =& \cfrac{\frac{1}{2}-1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}\\
+    m_y^1 =& \cfrac{\sqrt{3} -\left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}
+    \end{align*}
+
+    \item At $V_2 = \left(\frac{3}{2},\sqrt{3}\right):$
+    \begin{align*}
+    m_x^1(V_2) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}\\
+    m_y^1(V_2) =& \cfrac{\sqrt{3} - \left(\frac{1}{2} + \sqrt{3}\right)}{\sqrt{2}} =-\cfrac{1}{2\sqrt{2}}
+    \end{align*}
+
+    \item At $V_3 = \left(\frac{3}{2},1+\sqrt{3}\right):$
+    \begin{align*}
+    m_x^1(V_3) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}\\
+    m_y^1 =& \cfrac{1+\sqrt{3} -\left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = \frac{1}{2\sqrt{2}}
+    \end{align*}
+
+    \item At $V_4 = \left(\frac{1}{2},1+\sqrt{3}\right):$
+    \begin{align*}
+    m_x^1(V_4) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}\\
+    m_y^1(V_4) =& \cfrac{\sqrt{3} - \left(\frac{1}{2} + \sqrt{3}\right)}{\sqrt{2}} =-\cfrac{1}{2\sqrt{2}}
+    \end{align*}
+\end{enumerate}
+\end{multicols}
+
+\subsubsection{D$_1$ Matrix}
+$D_1 = \begin{pmatrix}
+    m_1^1(V_1) & m_x^1(V_1) & m_y^1(V_1)\\
+    m_1^1(V_2) & m_x^1(V_2) & m_y^1(V_2)\\
+    m_1^1(V_3) & m_x^1(V_3) & m_y^1(V_3)\\
+    m_1^1(V_4) & m_x^1(V_4) & m_y^1(V_4)\\
+\end{pmatrix} =
+\cfrac{1}{\sqrt{2}}\begin{pmatrix}
+    \sqrt{2} & -1 & -1\\
+    \sqrt{2} & 1 & -1\\
+    \sqrt{2} & 1 & 1\\
+    \sqrt{2} & -1 & 1\\
+\end{pmatrix}$
+
+
+\subsubsection{Gradient of m}
+\begin{enumerate}
+    \item $\nabla m_1^1 = (0,0)$
+    \item $\nabla m_x^1 = (\frac{1}{\sqrt{2}},0)$ 
+    \item $\nabla m_y^1 = (0,\frac{1}{\sqrt{2}})$ 
+\end{enumerate}
+
+
+\subsubsection{Local Basis Functions $\mathbf{\phi}$}
+Given $\varphi_i(V_j) = \delta_{ij}, \quad \forall i,j = 1, \ldots ,4$
+We can use the a lagrangian basis:
+$\varphi_i = \cfrac{(x_2-x)(y_4-y)}{(x_2-x_1)(y_4-y_1)}$\\
+
+$\varphi_1 = \cfrac{(\frac{3}{2} - x)(1+\sqrt{3} + y)}{(\frac{3}{2}-\frac{1}{2})(1+\sqrt{3} - \sqrt{3})}$\\
+Note the denominator is 1 and the same is true for the rest so they can be written in the following form.\\
+\begin{enumerate}
+    \item $\varphi_1 = (\frac{3}{2} - x)(1 + \sqrt{3} - y)$
+    \item $\varphi_2 = (x - \frac{1}{2})(1 + \sqrt{3} - y)$
+    \item $\varphi_3 = (x - \frac{1}{2} )(y - \sqrt{3})$
+    \item $\varphi_4 = (\frac{3}{2} - x)(y - \sqrt{3})$
+\end{enumerate}
+
+
+\subsubsection{Gradient of E$_1$ Local Basis Functions}
+\begin{enumerate}
+    \item $\nabla\varphi_1 = \left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right)$
+    \item $\nabla\varphi_2 = \left(1 + \sqrt{3} - y,-(x - \frac{1}{2})\right)$
+    \item $\nabla\varphi_3 = \left(y - \sqrt{3},x - \frac{1}{2}\right)$
+    \item $\nabla\varphi_4 = \left(-(y-\sqrt{3}),\frac{3}{2}-x\right)$
+\end{enumerate}
+
+
+% \subsubsection{Inner Products $(\nabla m_i^1, \nabla\varphi_j)_{E_1}$}
+% \begin{align*}
+%     (\nabla_x^1,\nabla\varphi_1)_{E_1} =& \iint_{E_1}\nabla m_x^1 \cdot \nabla\varphi_1 \,dydx \\
+%     & \int_\frac{1}{2}^\frac{3}{2} \left(\frac{1}{2},0\right)\cdot () \\
+% \end{align*}
+
+
+\subsubsection{$(\nabla m_x,\nabla\phi)$}
+$(\nabla m_x^1,\nabla\phi_1)_{E_1} = 
+\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
+-\frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
+-\frac{1}{\sqrt{2}}$\\
+$(\nabla m_x^1,\nabla\phi_2)_{E_1} = 
+\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
+\frac{1}{\sqrt{2}}(1 + \sqrt{3} - y)|_{y=\sqrt{3}} = 
+\frac{1}{\sqrt{2}}$\\
+$(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
+\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
+\frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
+-\frac{1}{\sqrt{2}}$\\
+$(\nabla m_x^1,\nabla\phi_3)_{E_1} = 
+\left(\frac{1}{\sqrt{2}},0\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
+-\frac{1}{\sqrt{2}}(y-\sqrt{3})|_{y=\sqrt{3}+1} = 
+\frac{1}{\sqrt{2}}$\\
+
+
+\subsubsection{$\mathbf{(\nabla m_y,\nabla\phi)}$}
+$(\nabla m_y^1,\nabla\phi_1)_{E_1} = 
+\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right) = 
+-\frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
+-\frac{1}{\sqrt{2}}$\\
+$(\nabla m_y^1,\nabla\phi_2)_{E_1} = 
+\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(1 + \sqrt{3} - y),  -(x-\frac{1}{2})\right) = 
+-\frac{1}{\sqrt{2}}(x - \frac{1}{2})|_{x=\frac{3}{2}} = 
+-\frac{1}{\sqrt{2}}$\\
+$(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
+\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(y-\sqrt{3}, x-\frac{1}{2}\right) = 
+\frac{1}{\sqrt{2}}(x-\frac{1}{2})|_{x=\frac{3}{2}} = 
+\frac{1}{\sqrt{2}}$\\
+$(\nabla m_y^1,\nabla\phi_3)_{E_1} = 
+\left(0,\frac{1}{\sqrt{2}}\right)\cdot\left(-(y-\sqrt{3}), \frac{3}{2}-x)\right) = 
+\frac{1}{\sqrt{2}}(\frac{3}{2}-x)|_{x=\frac{1}{2}} = 
+\frac{1}{\sqrt{2}}$\\
+
+\subsubsection{B$_1$ Matrix}
+$B_1 = \frac{1}{4}\begin{pmatrix}
+    1 & 1 & 1 & 1 \\
+    -d & 1 & -1 & 1\\
+    -1 & -1 & 1 & 1 
+\end{pmatrix}$
+
+\subsubsection{G Matrix}
+$G_1 = \begin{pmatrix}
+    1
+\end{pmatrix}
+$
+
+\subsection{E$_2$}
+For $E_1$ the square the coordinates of the centriod are, $x_{E_2} = (1,1).$ The diameter is, $ h_{E_1} = 2$ and the area is $|E_1| = \frac{3\sqrt{3}}{2}$.\\
+\\
+For $m_1^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{0} = 1$\\
+For $m_x^2 = \left(\cfrac{x - 1}{2}\right)^{1}\left(\cfrac{y - 1}{2}\right)^{0} = \cfrac{(x-1)}{2}$\\
+For $m_y^2 = \left(\cfrac{x - 1}{2}\right)^{0}\left(\cfrac{y - 1}{2}\right)^{1} = \cfrac{y-1}{2}$\\
+
+\subsubsection{Monimals}
+$\begin{array}{ll}
+m_x^2|_{x=0}\hspace{1.5pt} = \cfrac{0-1}{2} = -\frac{1}{2} &\qquad m_y^2|_{y=0} \hspace{7pt}= \cfrac{0-1}{2} = -\frac{1}{2} \\
+m_x^2|_{x=\frac{1}{2}} = \cfrac{\frac{1}{2}-1}{2} = -\frac{1}{4} &\qquad m_y^2|_{y=\frac{\sqrt{3}}{2}} = \cfrac{\frac{\sqrt{3}}{2}-1}{2} = \frac{\sqrt{3}-2}{4} \\
+m_x^2|_{x=\frac{3}{2}} = \cfrac{\frac{3}{2}-1}{2} = \frac{1}{4} &\qquad m_y^2|_{y=\sqrt{3}}\, = \cfrac{\sqrt{3}-1}{2} = \frac{\sqrt{3}-1}{2} \\
+m_x^2|_{x=2}\hspace{1.5pt} = \cfrac{2-1}{2} = \frac{1}{2} &
+\end{array}$
+
+$D_2 = \cfrac{1}{4}\begin{pmatrix}
+    4 & -1 & - 2\\
+    4 & 1 & - 2\\
+    4 & 2 & \sqrt{3} - 2\\
+    4 & 1 & 2\sqrt{3} - 2\\
+    4 & -1 & 2\sqrt{2} - 2\\
+    4 & -2 & \sqrt{3} - 2\\
+\end{pmatrix}$
+
+\subsection{B matrix}
+$\nabla m_1^2 = (0,0)$\\
+$\nabla m_x^2 = (\frac{1}{2},0)$ \\
+$\nabla m_y^2 = (0,\frac{1}{2})$ \\
+
+Hence, \\
+$P_0m_1 = \int_E\frac{1}{E}$
+
+\end{document}
