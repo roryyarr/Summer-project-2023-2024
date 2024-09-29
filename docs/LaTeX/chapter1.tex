@@ -1,13 +1,31 @@
-\documentclass[class=article, crop=false]{standalone}
+\documentclass{report}
 
-\usepackage{amsmath}
-\usepackage{amssymb}
+\usepackage{vem-preamble}
 
+\newtheorem{theorem}{Theorem}
 \begin{document}
 
-\section{Theory}
+\chapter{Theory}
 
-\subsection{Poisson Problem}
+\section{Functional Spaces}
+Functional spaces create the mathematical framework for analysis of partial diffitatial equations. So some of the relevant spaces are presented for clarity. Such as the Hilbert space $H$ which is equipped with the inner product $(\cdot,\cdot)_E.$ The Lebesgue space $L^2(\Omega)$ has a inner product given by:
+$$(f,g)_{L^2(\Omega)} = \int_{\Omega}f(x)g(x)\,dx.$$
+
+
+\subsection{Sobolov Spaces}
+This is perhaps the most important space for understanding PDEs, as it expands the concepts of a derivative to a Hilbert space. The Sobolov space $H^1$ is defined as:
+$$ H^1(\Omega) = \left\{ v \in L^2(\Omega) \ \bigg| \text{ all week second order derivatives of $v$ exist }  \right\}. $$ \cite{brezis_functional_analysis}
+Then the Sobolev space with homogeneous boundary conditions:
+$$
+H^1_0(\Omega) = \left\{ v \in H^1(\Omega) \ \bigg| \ v = 0 \text{ on } \partial\Omega \right\}.
+$$
+Finally, the Sobolev space with non-homogeneous boundary conditions:
+$$
+H^1_g(\Omega) = \left\{ v \in H^g(\Omega) \ \bigg| \ v = g \text{ on } \partial\Omega \right\}.
+$$
+
+
+section{Poisson Problem}
 The non-homogeneous Poisson problem is defined as:
 \begin{align}
     -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
@@ -24,15 +42,12 @@ Where:
 \end{itemize}
 
 
-\subsubsection{The Variational Forms}
-To derive the variational form of the Poisson problem, follow these steps:
 
-\begin{enumerate}
-    \item \textbf{Define the Sobolev Space:}
-    $$
-    H^1_g(\Omega) = \left\{ v \in H^1(\Omega) \ \bigg| \ v = g \text{ on } \partial\Omega \right\}.
-    $$
-    
+
+\section{The Variational Form}
+To solve this fomulation of the Poisson a varitational form is used. First the 
+
+\begin{enumerate}    
     \item \textbf{Decompose the Solution:}
     Assume that the solution $u$ can be written as:
     $$
@@ -100,8 +115,9 @@ To derive the variational form of the Poisson problem, follow these steps:
     Let $L: H \rightarrow \mathbb{R}$ be a bounded linear functional. Then, there exists a unique $u \in H$ such that
     $$
     a(u, v) = L(v) \quad \forall v \in H.
-    $$
-\end{theorem}
+    $$ \cite{LaxMilgram1955}
+
+\end{theorem} 
 
 \subsubsection{Application to the Poisson Problem}
 Given $H^1_0(\Omega)$ is a Hilbert space $u_0$ has a unique solution because:
