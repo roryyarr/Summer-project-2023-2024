@@ -12,10 +12,10 @@
 
 This section details a worked solution of the non-homogeneous Poisson problem on a simple mesh, to illustrate the Virtual Element Method.
 
-$\left{\begin{array}{rl}
+$$\left\{\begin{array}{rl}
     -\Delta u(x,y) &= 2\pi^2\sin(\pi x)\sin(\pi y)\\
     u(x,y) &= \sin(\pi x)\sin(\pi y)
-\end{array}\right$
+\end{array}\right$$
 
 \subsection{Mesh Definition}
 
@@ -26,7 +26,6 @@ $\left{\begin{array}{rl}
     \caption{Diagram showing $E_1$ and $E_2$ with labeled vertices.}
     \label{docs/LaTeX/diagram}
 \end{figure}
-
 
 \include{docs/LaTeX/diagram}
 
@@ -59,7 +58,7 @@ E_2 = \begin{cases}
 
 \subsubsection{Element Geometry}
 \begin{itemize}
-    \item The centriod $x_{E_1} = (1, \frac{1}{2}+\sqrt{3}).$
+    \item The centroid $x_{E_1} = (1, \frac{1}{2}+\sqrt{3}).$
     \item The diameter is, $ h_{E_1} = \sqrt{2}$
     \item area is $|E_1| = 1$.
 \end{itemize}
@@ -75,54 +74,45 @@ E_2 = \begin{cases}
 \end{enumerate}
 
 
-\subsubsection{DOF}
-
-
+\subsubsection{Degrees of Freedom (DOF)}
 
 \begin{multicols}{2}
 \begin{enumerate}
-    \item At $V_1 = \left(\frac{1}{2},\sqrt{3}\right):$
-    \begin{align*}
-    m_x^1(V_1) =& \cfrac{\frac{1}{2}-1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}\\
-    m_y^1 =& \cfrac{\sqrt{3} -\left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}
-    \end{align*}
+    \item At $E_1V_1 = \left(\frac{1}{2}, \sqrt{3}\right)$:\\
+    $m_x^1(E_1V_1) = \frac{\frac{1}{2} - 1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}$\\
+    $m_y^1(E_1V_1) = \frac{\sqrt{3} - \left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}$
 
-    \item At $V_2 = \left(\frac{3}{2},\sqrt{3}\right):$
-    \begin{align*}
-    m_x^1(V_2) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}\\
-    m_y^1(V_2) =& \cfrac{\sqrt{3} - \left(\frac{1}{2} + \sqrt{3}\right)}{\sqrt{2}} =-\cfrac{1}{2\sqrt{2}}
-    \end{align*}
+    \item At $E_1V_2 = \left(\frac{3}{2}, \sqrt{3}\right)$:\\
+    $m_x^1(E_1V_2) = \frac{\frac{3}{2} - 1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}$ \\
+    $m_y^1(E_1V_2) = \frac{\sqrt{3} - \left(\frac{1}{2} + \sqrt{3}\right)}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}$
 
-    \item At $V_3 = \left(\frac{3}{2},1+\sqrt{3}\right):$
-    \begin{align*}
-    m_x^1(V_3) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}\\
-    m_y^1 =& \cfrac{1+\sqrt{3} -\left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = \frac{1}{2\sqrt{2}}
-    \end{align*}
+    \item At $E_1V_3 = \left(\frac{3}{2}, 1 + \sqrt{3}\right)$:\\
+    $m_x^1(E_1V_3) = \frac{\frac{3}{2} - 1}{\sqrt{2}} = \frac{1}{2\sqrt{2}}$ \\
+    $m_y^1(E_1V_3) = \frac{1 + \sqrt{3} - \left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = \frac{1}{2\sqrt{2}}$
 
-    \item At $V_4 = \left(\frac{1}{2},1+\sqrt{3}\right):$
-    \begin{align*}
-    m_x^1(V_4) =& \cfrac{\frac{3}{2}-1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}\\
-    m_y^1(V_4) =& \cfrac{\sqrt{3} - \left(\frac{1}{2} + \sqrt{3}\right)}{\sqrt{2}} =-\cfrac{1}{2\sqrt{2}}
-    \end{align*}
+    \item At $E_1V_4 = \left(\frac{1}{2}, 1 + \sqrt{3}\right)$:\\
+    $m_x^1(E_1V_4) = \frac{\frac{1}{2} - 1}{\sqrt{2}} = -\frac{1}{2\sqrt{2}}$ \\
+    $m_y^1(E_1V_4) = \frac{1 + \sqrt{3} - \left(\sqrt{3} + \frac{1}{2}\right)}{\sqrt{2}} = \frac{1}{2\sqrt{2}}$
 \end{enumerate}
 \end{multicols}
 
+
 \subsubsection{D$_1$ Matrix}
-$D_1 = \begin{pmatrix}
+$$D_1 = \begin{pmatrix}
     m_1^1(V_1) & m_x^1(V_1) & m_y^1(V_1)\\
     m_1^1(V_2) & m_x^1(V_2) & m_y^1(V_2)\\
     m_1^1(V_3) & m_x^1(V_3) & m_y^1(V_3)\\
     m_1^1(V_4) & m_x^1(V_4) & m_y^1(V_4)\\
-\end{pmatrix} =
-\cfrac{1}{\sqrt{2}}\begin{pmatrix}
-    \sqrt{2} & -1 & -1\\
-    \sqrt{2} & 1 & -1\\
-    \sqrt{2} & 1 & 1\\
-    \sqrt{2} & -1 & 1\\
-\end{pmatrix}$
+\end{pmatrix} \quad = \quad
+\begin{pmatrix}
+    1 & -\frac{1}{2\sqrt{2}} & -\frac{1}{2\sqrt{2}}\\
+    1 & \frac{1}{2\sqrt{2}} & -\frac{1}{2\sqrt{2}}\\
+    1 & \frac{1}{2\sqrt{2}} & \frac{1}{2\sqrt{2}}\\
+    1 & -\frac{1}{2\sqrt{2}} & \frac{1}{2\sqrt{2}}\\
+\end{pmatrix}$$
 
 
-\subsubsection{Gradient of m}
+\subsubsection{Gradient of Monomial Basis}
 \begin{enumerate}
     \item $\nabla m_1^1 = (0,0)$
     \item $\nabla m_x^1 = (\frac{1}{\sqrt{2}},0)$ 
@@ -130,45 +120,37 @@ $D_1 = \begin{pmatrix}
 \end{enumerate}
 
 
-\subsubsection{Local Basis Functions $\mathbf{\phi}$}
-Given $\varphi_i(V_j) = \delta_{ij}, \quad \forall i,j = 1, \ldots ,4$
-We can use the a lagrangian basis:
-$\varphi_i = \cfrac{(x_2-x)(y_4-y)}{(x_2-x_1)(y_4-y_1)}$\\
-
-$\varphi_1 = \cfrac{(\frac{3}{2} - x)(1+\sqrt{3} + y)}{(\frac{3}{2}-\frac{1}{2})(1+\sqrt{3} - \sqrt{3})}$\\
-Note the denominator is 1 and the same is true for the rest so they can be written in the following form.\\
-\begin{enumerate}
-    \item $\varphi_1 = (\frac{3}{2} - x)(1 + \sqrt{3} - y)$
-    \item $\varphi_2 = (x - \frac{1}{2})(1 + \sqrt{3} - y)$
-    \item $\varphi_3 = (x - \frac{1}{2} )(y - \sqrt{3})$
-    \item $\varphi_4 = (\frac{3}{2} - x)(y - \sqrt{3})$
-\end{enumerate}
+\subsubsection{Local Basis Functions $\boldsymbol{\varphi}$}
+Given $\varphi_i(V_j^{E_1}) = \delta_{ij}, \quad \forall i,j = 1, \ldots ,4. \quad \varphi$  construct each basis function at each vertex using the follwoing equation:
+$$\varphi_i = \cfrac{(x_{i+1}-x)(y_{i+1}-y)}{(x_{i+1}-x_{i})(y_{i+1}-y_{i})}$$\\
+where $(x_i, y_i)$ and $(x_{i+1}, y_{i+1})$ are the coordinate for the points $V_i$ and $V_{i+1}^{E_1}$ respectively. Moreover  
+Because $E_1$ is square with side lengths of 1 the denominator $(x_{i+1}-x_{i})(y_{i+1}-y_{i}) = 1, \quad \forall i.$ Hence the basis functions are calculated as follows:
+\begin{multicols}{2}
+    \begin{enumerate}
+        \item $\varphi_1 = (\frac{3}{2} - x)(1 + \sqrt{3} - y)$
+        \item $\varphi_2 = (x - \frac{1}{2})(1 + \sqrt{3} - y)$
+        \item $\varphi_3 = (x - \frac{1}{2} )(y - \sqrt{3})$
+        \item $\varphi_4 = (\frac{3}{2} - x)(y - \sqrt{3})$
+    \end{enumerate}
+\end{multicols}
 
 
 \subsubsection{Gradient of E$_1$ Local Basis Functions}
-\begin{enumerate}
-    \item $\nabla\varphi_1 = \left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right)$
-    \item $\nabla\varphi_2 = \left(1 + \sqrt{3} - y,-(x - \frac{1}{2})\right)$
-    \item $\nabla\varphi_3 = \left(y - \sqrt{3},x - \frac{1}{2}\right)$
-    \item $\nabla\varphi_4 = \left(-(y-\sqrt{3}),\frac{3}{2}-x\right)$
-\end{enumerate}
-
-
-\subsubsection{$P_0\varphi_i$}
-
-$P_0\varphi_1 = \cfrac{1}{|E_1|}\int_{E_1}\varphi_i \,dydx = \frac{1}{2}\times\frac{1}{2}$
-
-
 \begin{multicols}{2}
-\begin{enumerate}
-$
-P_0\varphi_0 = \iint_E(\frac{3}{2} - x)(1+\sqrt{3}-y)dxdy \\
-\hspace*{22pt}= \int_{\frac{1}{2}}^{\frac{3}{2}}(\frac{3}{2} - x)dx \int_{\sqrt{3}}^{1+\sqrt{3}}(1+\sqrt{3}-y)dy\\
-\hspace*{22pt}= \frac{1}{4}[3x-x^2]_{\frac{1}{2}}^{\frac{3}{2}}[2(1+\sqrt{3})x - x^2]_{\sqrt{3}}^{1+\sqrt{3}}\\
-\hspace*{22pt}= \frac{1}{4}(9/2-9/4 - 3/2+1/4)(2(1+\sqrt{3})(1+\sqrt{3})\\
-\hspace*{22pt}= \frac{1}{4}(1)(1)$
-\end{enumerate}
+    \begin{enumerate}
+        \item $\nabla\varphi_1 = \left(-(1 + \sqrt{3} - y),  -(\frac{3}{2}-x)\right)$
+        \item $\nabla\varphi_2 = \left(1 + \sqrt{3} - y,-(x - \frac{1}{2})\right)$
+        \item $\nabla\varphi_3 = \left(y - \sqrt{3},x - \frac{1}{2}\right)$
+        \item $\nabla\varphi_4 = \left(-(y-\sqrt{3}),\frac{3}{2}-x\right)$
+    \end{enumerate}
 \end{multicols}
+
+
+\subsubsection{Projection $\boldsymbol{P_0\varphi_i}$}
+The projection is defined as follows:
+$$P_0\varphi_j = \cfrac{1}{4}\sum_{j=1}^4\varphi_i(V_j^{E_1})$$
+Subsequently, $P_0\varphi_i = \frac{1}{4}, \quad \forall i$ because  $\varphi_i(V_j^{E_1}) = \delta_{ij}$
+
 
 \subsubsection{Inner Products $(\nabla m_i^1, \nabla\varphi_j)_{E_1}$}
 \begin{enumerate}
