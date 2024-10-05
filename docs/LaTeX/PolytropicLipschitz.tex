@@ -1,0 +1,132 @@
+\documentclass{article}
+
+\usepackage{vem-preamble}
+
+\begin{document}
+
+
+\section{Partition of \texorpdfstring{$\Omega$}{Omega}}
+
+In order to apply the Virtual Element Method (VEM) to solve the Poisson problem, we partition the domain \( \Omega \) into a finite number of non-overlapping polytopic elements. These elements are polygons in two dimensions (2D) or polyhedra in three dimensions (3D), where the intersection of their boundaries occurs along lines (in 2D) or planes (in 3D). This partition ensures that the resulting mesh satisfies the necessary regularity conditions, specifically Lipschitz continuity, which is crucial for the well-posedness of the variational formulation and the applicability of Sobolev space theory.
+
+\subsection{Definition of Polytopes and Lipschitz Domains}
+
+\begin{definition}[Polytope]
+A \emph{polytope} in \( \mathbb{R}^n \) is a compact convex set that is the convex hull of a finite set of points in \( \mathbb{R}^n \). In the context of finite element meshes, a polytope is an \( n \)-dimensional geometric object with flat faces, straight edges, and sharp vertices. In 2D, polytopes are polygons, and in 3D, they are polyhedra.
+\end{definition}
+
+\begin{definition}[Lipschitz Domain]
+A domain \( D \subset \mathbb{R}^n \) is called a \emph{Lipschitz domain} if its boundary \( \partial D \) can be locally represented as the graph of a Lipschitz continuous function. That is, for every point \( x_0 \in \partial D \), there exists a neighborhood \( U \) of \( x_0 \) and a Lipschitz continuous function \( \phi: \mathbb{R}^{n-1} \rightarrow \mathbb{R} \) such that, up to a rotation and translation, \( D \cap U = \{ (x', x_n) \in U \mid x_n > \phi(x') \} \).
+\end{definition}
+
+\subsection{Proof that Polytopes are Lipschitz Domains}
+
+We will prove that a polytope \( P \subset \mathbb{R}^n \) is a Lipschitz domain. This means that the boundary \( \partial P \) satisfies the Lipschitz condition defined above.
+
+\subsubsection{Local Representation of the Boundary}
+
+Let \( x_0 \in \partial P \). Since \( P \) is a polytope, its boundary \( \partial P \) consists of flat faces (facets) joined along edges (in 3D) or vertices (in 2D). Near \( x_0 \), the boundary can be represented as a finite union of such flat faces.
+
+\paragraph{Step 1: Rotation and Translation}
+
+We can apply a rigid transformation (rotation and translation) to \( P \) such that \( x_0 = 0 \) (the origin), and the normal vector to one of the faces adjacent to \( x_0 \) is aligned with the \( x_n \)-axis.
+
+\paragraph{Step 2: Local Representation as a Graph}
+
+In a neighborhood \( U \) of \( x_0 \), \( \partial P \) can be described by linear equations representing the faces adjacent to \( x_0 \). Specifically, there exist finitely many linear functions \( \phi_i: \mathbb{R}^{n-1} \rightarrow \mathbb{R} \) such that each face \( F_i \) adjacent to \( x_0 \) is given by:
+
+\[
+F_i \cap U = \left\{ (x', x_n) \in U \mid x_n = \phi_i(x') \right\},
+\]
+
+where \( x' \in \mathbb{R}^{n-1} \).
+
+\paragraph{Step 3: Lipschitz Continuity of the Functions}
+
+Since the functions \( \phi_i \) are linear (affine) functions, they are Lipschitz continuous with Lipschitz constant \( L_i \) equal to the norm of their gradients:
+
+\[
+L_i = \| \nabla \phi_i \| = \left\| \left( \dfrac{\partial \phi_i}{\partial x_1}, \dfrac{\partial \phi_i}{\partial x_2}, \dots, \dfrac{\partial \phi_i}{\partial x_{n-1}} \right) \right\|.
+\]
+
+Because the gradients are constant (since \( \phi_i \) are linear), the Lipschitz constants \( L_i \) are finite.
+
+\paragraph{Step 4: Boundary Representation}
+
+The boundary \( \partial P \cap U \) near \( x_0 \) is the union of portions of these faces. We can define a function \( \phi: \mathbb{R}^{n-1} \rightarrow \mathbb{R} \) such that:
+
+\[
+\phi(x') = \max_{i} \phi_i(x'),
+\]
+
+for all \( x' \) in the projection of \( U \) onto \( \mathbb{R}^{n-1} \).
+
+\paragraph{Step 5: Lipschitz Continuity of the Boundary Function}
+
+Since each \( \phi_i \) is Lipschitz continuous, and the maximum of finitely many Lipschitz continuous functions is also Lipschitz continuous (with Lipschitz constant equal to the maximum of the individual Lipschitz constants), \( \phi \) is Lipschitz continuous.
+
+\paragraph{Step 6: Representation of the Domain}
+
+Therefore, in the neighborhood \( U \), the domain \( P \) can be represented as:
+
+\[
+P \cap U = \left\{ (x', x_n) \in U \mid x_n > \phi(x') \right\} \quad \text{(or } x_n < \phi(x') \text{, depending on orientation)}.
+\]
+
+This satisfies the definition of a Lipschitz domain.
+
+\subsubsection{Conclusion}
+
+Since every point \( x_0 \in \partial P \) has a neighborhood \( U \) where \( \partial P \) can be represented as the graph of a Lipschitz continuous function \( \phi \), the polytope \( P \) is a Lipschitz domain.
+
+\subsection{Implications for the Virtual Element Method}
+
+The Lipschitz continuity of the polytopic elements in the mesh \( \mathcal{T}_h \) is essential for several reasons:
+
+\begin{itemize}
+    \item \textbf{Sobolev Space Theory}: The well-posedness of the variational formulation relies on the properties of Sobolev spaces \( H^1(\Omega) \) and \( H^1_0(\Omega) \). Lipschitz domains ensure that Sobolev spaces are well-defined, and important embedding theorems hold.
+    \item \textbf{Integration by Parts}: The application of integration by parts in deriving the weak formulation requires that the domain has a boundary that is sufficiently regular, which is guaranteed by Lipschitz continuity.
+    \item \textbf{Trace Theorems}: The trace operator, which allows us to make sense of boundary conditions in Sobolev spaces, is well-defined on Lipschitz domains.
+    \item \textbf{Approximation Properties}: Lipschitz domains allow for the approximation of functions in Sobolev spaces by smoother functions, which is crucial for the convergence analysis of the VEM.
+\end{itemize}
+
+\subsection{Construction of the Mesh}
+
+The mesh \( \mathcal{T}_h \) is constructed by partitioning \( \Omega \) into polytopic elements \( E \) such that:
+
+\begin{enumerate}
+    \item \textbf{Conformity}: The elements fit together without overlaps or gaps, i.e., \( \overline{\Omega} = \bigcup_{E \in \mathcal{T}_h} \overline{E} \) and \( E^\circ \cap E'^\circ = \emptyset \) for \( E \neq E' \).
+    \item \textbf{Shape Regularity}: The elements satisfy certain regularity conditions to avoid degenerate shapes. For instance, there exist constants \( c_1, c_2 > 0 \) independent of \( h \) such that for all \( E \in \mathcal{T}_h \):
+    \[
+    c_1 h_E^n \leq |E| \leq c_2 h_E^n,
+    \]
+    where \( h_E \) is the diameter of \( E \), and \( |E| \) is the measure (area in 2D, volume in 3D) of \( E \).
+    \item \textbf{Star-Shapedness}: Each element \( E \) is star-shaped with respect to a ball of radius \( \rho h_E \), where \( \rho > 0 \) is a constant independent of \( h \).
+\end{enumerate}
+
+These conditions ensure that the elements are well-behaved geometrically, which is necessary for the stability and accuracy of the numerical method.
+
+\subsection{Summary}
+
+By partitioning \( \Omega \) into polytopic elements that are Lipschitz domains, we ensure that the mathematical framework underlying the VEM is valid. The Lipschitz continuity of the elements allows us to apply Sobolev space theory, integration by parts, and trace theorems, which are essential for formulating and analyzing the variational problem.
+
+This careful construction of the mesh and verification of the Lipschitz property provide a solid foundation for the numerical approximation of the Poisson problem using the Virtual Element Method.
+
+\subsection{References}
+
+\begin{thebibliography}{9}
+
+\bibitem{adams2003sobolev}
+Adams, R. A., \& Fournier, J. J. (2003). \textit{Sobolev Spaces} (2nd ed.). Academic Press.
+
+\bibitem{grisvard2011elliptic}
+Grisvard, P. (2011). \textit{Elliptic Problems in Nonsmooth Domains}. SIAM.
+
+\bibitem{beirao2014hitchhiker}
+Beir{\~a}o da Veiga, L., Brezzi, F., Cangiani, A., Manzini, G., Marini, L. D., \& Russo, A. (2014). A hitchhiker's guide to the virtual element method. \textit{Mathematical Models and Methods in Applied Sciences}, 24(08), 1541--1573.
+
+\end{thebibliography}
+
+
+
+\end{document}

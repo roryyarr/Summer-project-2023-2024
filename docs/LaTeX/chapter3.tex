@@ -1,0 +1,349 @@
+\documentclass{report}
+
+\usepackage{vem-preamble}
+
+\usepackage{hyperref}
+\usepackage{tabularx}
+
+\usepackage[table]{xcolor}
+
+% \newtheorem{theorem}{Theorem}
+\begin{document}
+
+\chapter{Implimentation}
+Lastly this report focuses on the implementation of Sutton's MATLAB VEM code into Julia. The code can be located on \href{https://github.com/roryyarr/Summer-project-2023-2024}{GitHub} in the source (src) directory. The choice of Julia gives a balance between the readability of python and Matlab and the performance of C and C++. One of the main benefits of Julia is the ability to assign types to variables. Combined with its Just In Time(JIT) compiler allows Julia significant performance improvements over Matlab and python.\cite{Bezanson2012Julia}
+
+
+\section{Modules}
+This implementation leverages Julia's Modules to divide the code into separate files, where each file name is: \texttt{modul\_name.jl}. This allows the module to be conveniently called using the follwoing command:
+\begin{jllisting}[style=JuliaStyle]
+using module_name
+\end{jllisting}
+
+From here the code has been segmented into the following files:
+\begin{itemize}
+    \item \texttt{vem\_problem.jl}
+    \item \texttt{read\_mat.jl}
+    \item \texttt{square\_domain.jl} and \texttt{L\_domain.jl}
+    \item \texttt{vem\_method.jl}
+    \item \texttt{vem\_solver.jl}
+    
+\end{itemize}
+
+
+\section{vem\_problem}
+
+This module contains the data structure of the mesh used for the problem mesh. Utilising Julia's C like Structs, it arranges the mesh in the following form:
+\begin{jllisting}[style=JuliaStyle]
+struct Mesh
+    boundary::Vector{Int64}    # Indices of boundary vertices
+    elements::Vector{Vector{Int64}}  # Indices of vertices for each element
+    vertices::Vector{Tuple{Float64, Float64}}  # Coordinates of vertices
+end
+\end{jllisting}
+
+where the Int64 is a integer and Float64 is a floating point representation of a real number.
+
+\section{read\_mat}
+
+This module reads .mat files used for storing meshes and places the data into the Mesh struct.
+
+
+\section{Domains}
+
+These modules handle the boundary and non-homogeneous conditions.
+
+\subsection{L\_domain}
+
+This provides the conditions for the L domain:
+$$g = r^{2/3}\sin{\left(\frac{2\theta-\pi}{6}\right)} \quad \text{and} \quad f =0 $$
+
+\subsection{square\_domain}
+
+This provides the conditions for the square domain:
+$$g = (1-x)y\sin(\pi x) \quad \text{and} \quad f = 15\sin(\pi x)\sin(\pi y)$$
+
+
+\section{vem\_method}
+
+This module contains the main method and implementation of the virtual element method.
+The function is encapsulated in the following function:
+
+\begin{jllisting}[style=JuliaStyle]
+function vem(mesh::Mesh, rhs::Function, boundary_condition::Function)::Vector{Float64}
+\end{jllisting}
+
+\begin{enumerate}
+    \item First the matrices and other objects are initialised:
+    \begin{jllisting}[style=JuliaStyle]
+    # Initialize problem dimensions
+    n_dofs = length(mesh.vertices)  # Number of degrees of freedom, one per vertex
+    n_polys = 3  # Number of polynomials in the VEM space (constant + linear terms)
+    
+    # Initialize global stiffness matrix, forcing vector, and solution vector
+    K = spzeros(Float64, n_dofs, n_dofs)  # Global stiffness matrix
+    F = zeros(n_dofs)  # Global forcing vector
+    u = zeros(n_dofs)  # Solution vector (degrees of freedom)
+    
+    # Linear polynomials (constant, x, y)
+    linear_polynomials = [[0, 0], [1, 0], [0, 1]]  # Polynomial basis functions
+    \end{jllisting}
+    
+    \item The code then loops over all elements of the mesh.
+    \begin{jllisting}[style=JuliaStyle]
+        # Loop over all elements in the mesh to compute local contributions to K and F
+        for el_id in 1:length(mesh.elements)
+    \end{jllisting}
+
+    \begin{enumerate}
+        \item For each element the following geometry properties are calculated:
+        \begin{jllisting}[style=JuliaStyle]
+            vert_ids = mesh.elements[el_id]  # Global vertex IDs of this element
+            verts = [mesh.vertices[v] for v in vert_ids]  # Coordinates of the element's vertices
+            n_sides = length(vert_ids)  # Number of sides of the polygon (element)
+        
+            # Compute geometric properties of the element (area, centroid, and diameter)
+            verts_array = hcat([collect(v) for v in verts]...)'  # Convert vertex coordinates to matrix form
+            area_components = verts_array[:,1] .* verts_array[[2:end; 1],2] .- verts_array[[2:end; 1],1] .* verts_array[:,2]
+            area = 0.5 * abs(sum(area_components))  # Compute the area of the polygon
+        
+            # Compute the centroid of the polygon
+            centroid = sum((verts_array .+ verts_array[[2:end; 1],:]) .* repeat(area_components, 1, 2), dims=1) / (6 * area)
+        
+            # Compute the diameter of the polygon (largest distance between two vertices)
+            diameter = 0.0
+            for i in 1:(n_sides-1)
+                for j in (i+1):n_sides
+                    diameter = max(diameter, norm(verts_array[i, :] - verts_array[j, :]))
+                end
+            end
+        \end{jllisting}
+
+        \item Next the B and D matrices are computed:
+        \begin{jllisting}[style=JuliaStyle]
+        # Initialize D and B matrices for the element
+        D = zeros(n_sides, n_polys)  # Matrix D for polynomial projections
+        D[:, 1] .= 1  # Constant term in polynomial
+        B = zeros(n_polys, n_sides)  # Matrix B for polynomial evaluation
+        B[1, :] .= 1 / n_sides  # Constant term for all sides
+        
+        # Fill the D and B matrices with values for each vertex of the element
+        for vertex_id in 1:n_sides
+            vert = verts[vertex_id]
+            prev = verts[mod(vertex_id - 2, n_sides) + 1]  # Previous vertex
+            next = verts[mod(vertex_id, n_sides) + 1]  # Next vertex
+        
+            # Coordinates of current, previous, and next vertices
+            vert_x, vert_y = vert
+            prev_x, prev_y = prev
+            next_x, next_y = next
+        
+            vertex_normal = [next_y - prev_y, prev_x - next_x]  # Normal vector to the edge
+            centroid_vec = vec(centroid)  # Centroid vector
+        
+            # Fill D and B for higher-degree polynomials (linear terms)
+            for poly_id in 2:n_polys
+                poly_degree = linear_polynomials[poly_id]  # Polynomial degrees
+                monomial_grad = poly_degree / diameter  # Gradient of the monomial
+        
+                D[vertex_id, poly_id] = dot([vert_x, vert_y] .- centroid_vec, poly_degree) / diameter
+                B[poly_id, vertex_id] = 0.5 * dot(monomial_grad, vertex_normal)
+            end
+        end
+        \end{jllisting}
+
+        \item Next the F and K matrices are computed for the element.
+        \begin{jllisting}[style=JuliaStyle]
+                # Compute the projector and stabilizing term for the stiffness matrix
+                projector = (B * D) \ B  # Projector matrix
+                stabilising_term = (I - D * projector)' * (I - D * projector)  # Stabilizing term for the stiffness matrix
+        
+                # G matrix for additional stability
+                G = B * D
+                G[1, :] .= 0  # Set the first row to 0 (to satisfy certain stability conditions)
+        
+                # Compute the local stiffness matrix for this element
+                local_stiffness = projector' * G * projector + stabilising_term
+        
+                # Assemble the local stiffness matrix into the global matrix K
+                for i in 1:length(vert_ids)
+                    for j in 1:length(vert_ids)
+                        K[vert_ids[i], vert_ids[j]] += local_stiffness[i, j]
+                    end
+                end
+        
+                # Compute the contribution to the global forcing vector F
+                rhs_value = rhs(centroid)  # Evaluate the right-hand side function at the centroid
+                F[vert_ids] .+= rhs_value * area / n_sides
+        
+            end
+        \end{jllisting}
+
+        This completes the calculations for the element.
+
+    \end{enumerate}
+    
+    \item Finally, the boundary conditions are applied to give the solution.
+    \begin{jllisting}[style=JuliaStyle]
+    # Apply boundary conditions
+    boundary_values = boundary_condition(mesh.vertices)
+    
+    for idx in mesh.boundary
+        u[idx] = boundary_values[idx]  # Set solution values at boundary
+        K[idx, :] .= 0  # Zero out the row in K
+        K[idx, idx] = 1.0  # Set the diagonal entry to 1
+        F[idx] = boundary_values[idx]  # Set the corresponding entry in F
+    end
+    
+    # Solve the system K * u = F to find the solution
+    u = K \ F
+    
+    return u  # Return the computed solution
+    \end{jllisting}
+\end{enumerate}
+
+
+
+\section{plot\_solution}
+
+This module contains the plotting functions for this vem code. It contains a heatmap and a wireframe plot.
+
+\subsection{plot\_heatmap}
+Unlike MatLab Julia lacked a function similar to MatLabs Patches plotting function, so the elements has to be plotted separately using a loop structure. Where each element is its own unique plot.
+
+
+\begin{jllisting}[style=JuliaStyle]
+function plot_heatmap(mesh::Mesh, solution::Vector{Float64}; ptitle =nothing, axis_labels = nothing, colourscheme=:blues, show_colourbar=true, savepath=nothing)
+    # Extract the vertices and solution values
+    x_coords = [v[1] for v in mesh.vertices]
+    y_coords = [v[2] for v in mesh.vertices]
+
+    # Calculate the axis limits based on the mesh vertices
+    x_min, x_max = minimum(x_coords), maximum(x_coords)
+    y_min, y_max = minimum(y_coords), maximum(y_coords)
+
+    # Create a plot object with aspect ratio and axis limits, conditionally showing the color bar
+    p = plot(legend = false, aspect_ratio = :equal, xlims=(x_min, x_max), ylims=(y_min, y_max), 
+             colorbar = show_colourbar ? :right : false)
+
+    # Loop through each element to fill with interpolated color
+    for element in mesh.elements
+        # Extract the x, y coordinates of the vertices in the element
+        x_elem = x_coords[element]
+        y_elem = y_coords[element]
+        
+        # Get the solution values for the vertices of the element
+        solution_elem = solution[element]
+
+        # Fill the polygon (triangle/polygon in this case) with interpolated color
+        plot!(p, x_elem, y_elem, fill_z = solution_elem, seriestype = :shape, lw = 1, colour=colourscheme)
+    end
+
+    # Final plot customization
+    if axis_labels !== nothing
+        xlabel!(p, axis_labels[1])
+        ylabel!(p, axis_labels[2])
+    end
+    if ptitle !== nothing
+        title!(p, ptitle)
+    end
+
+
+    # Save the plot if savepath is provided, otherwise display it
+    if savepath !== nothing
+        savefig(p, savepath)
+    else
+        display(p)
+    end
+end
+\end{jllisting}
+
+\subsection{plot\_wireframe}
+
+This function create a wireframe plot using the following code:
+\begin{jllisting}[style=JuliaStyle]
+function plot_wireframe(mesh::Mesh, heights::Vector{Float64}; ptitle=nothing, azimuth=30, elevation=30, solidcolour=nothing, colourscheme=:viridis, savepath=nothing)
+    # Extract vertices coordinates
+    x_coords = [v[1] for v in mesh.vertices]
+    y_coords = [v[2] for v in mesh.vertices]
+
+    # Normalize heights for color mapping
+    min_h = minimum(heights)
+    max_h = maximum(heights)
+    norm_heights = (heights .- min_h) ./ (max_h - min_h)
+
+    # Initialize 3D plot with camera position
+    if ptitle !== nothing
+        fig = plot3d(title=ptitle, legend=false, camera=(azimuth, elevation))
+    else
+        fig = plot3d(legend=false, camera=(azimuth, elevation))
+    end
+    # Loop through each element and plot the wireframe
+    for element in mesh.elements
+        # Get the x, y, and z coordinates for the current element
+        x_el = [x_coords[i] for i in element]
+        y_el = [y_coords[i] for i in element]
+        z_el = [heights[i] for i in element]
+
+        # Close the polygon by adding the first vertex at the end
+        append!(x_el, x_el[1])
+        append!(y_el, y_el[1])
+        append!(z_el, z_el[1])
+
+        # Determine color based on provided inputs
+        if solidcolour !== nothing
+            # Use the solid color if provided
+            line_colour = solidcolour
+        elseif colourscheme !== nothing
+            # Use the color scheme if no solid color is provided
+            avg_height = mean(norm_heights[element])  # Average height for the element
+            line_colour = cgrad(colourscheme)[round(Int, avg_height * 255) + 1]  # Color from gradient
+        else
+            error("Please provide either a valid color scheme or a solid color.")
+        end
+
+        # Plot the edges of the polygon
+        plot3d!(x_el, y_el, z_el, linecolor=line_colour, linewidth=1.5)
+    end
+
+    # Save the plot if savepath is provided, otherwise display it
+    if savepath !== nothing
+        savefig(fig, savepath)
+    else
+        display(fig)
+    end
+end
+\end{jllisting}
+
+
+\section{vem\_solver}
+Lastly there is the file \texttt{vem\_solver.jl} that runs a command line version of the code. Which accepts a range of options shown in table \eqref{tab:vem_options}
+
+\begin{table}[ht]
+    \centering
+    \caption{Command-Line Options for VEM Problem Solver}
+    \label{tab:vem_options}
+    % Slightly increase the vertical height of rows
+    \renewcommand{\arraystretch}{1.5}
+    % Set alternating row colors, starting from row 2
+    \rowcolors{2}{gray!30}{black!10}
+    \begin{tabularx}{\textwidth}{|l|X|c|X|}
+        \hline
+        \textbf{Option} & \textbf{Description} & \textbf{Required} & \textbf{Default Value} \\
+        \hline
+        \texttt{--file, -f}         & Path to the \texttt{.mat} file containing the VEM problem. & Yes & N/A \\
+        \texttt{--plot, -p}         & Plot type: choose either ``heatmap'' or ``wireframe''. & No & N/A \\
+        \texttt{--ptitle, -t}       & Title for the plot. & No & None \\
+        \texttt{--colourscheme, -c} & Color scheme for the plot. Default: ``blues'' for heatmap, ``viridis'' for wireframe. & No & ``blues'' for heatmap \\
+        \texttt{--azimuth, -a}      & Azimuth angle for the wireframe plot. Default: \texttt{30}. & No & \texttt{30.0} \\
+        \texttt{--elevation, -e}    & Elevation angle for the wireframe plot. Default: \texttt{30}. & No & \texttt{30.0} \\
+        \texttt{--solidcolour, -s}  & Solid color for the wireframe plot. & No & N/A \\
+        \texttt{--savepath, -o}     & File path to save the generated plot (e.g., \texttt{output.png}). & No & N/A \\
+        \texttt{--debug, -d}        & Enable debug mode and output detailed information. & No & Disabled \\
+        \texttt{--debug\_file, -D}  & Path to store debug output. Default: \texttt{vem\_debug\_output.md}. & No & \texttt{vem\_debug\_output.md} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+
+\end{document}

@@ -25,7 +25,7 @@ H^1_g(\Omega) = \left\{ v \in H^g(\Omega) \ \bigg| \ v = g \text{ on } \partial\
 $$
 
 
-section{Poisson Problem}
+\section{Poisson Problem}
 The non-homogeneous Poisson problem is defined as:
 \begin{align}
     -\Delta u &= f \quad \text{in } \Omega, \label{eq:poisson}\\
@@ -41,61 +41,33 @@ Where:
     \item $u$ is the unknown solution function.
 \end{itemize}
 
+\section{Partition of $\boldsymbol{\Omega}$}
+The region $\Omega$ can be partitioned into a finite number of non-overlapping polytopic elements. Where the intersection of their boundaries are lines two dimensions or planes and hyperplanes in more than two dimensions. Which ensures the partition has more the necessary properties reguality conditions ,namely Lipschitz continuity. More information is contained in the appendix.
 
-
+\subsection{Construction of the Mesh}
+The mesh 
 
 \section{The Variational Form}
-To solve this fomulation of the Poisson a varitational form is used. First the 
+To solve this fomulation of the Poisson a varitational form is used. 
 
-\begin{enumerate}    
-    \item \textbf{Decompose the Solution:}
-    Assume that the solution $u$ can be written as:
-    $$
-    u = u_0 + \tilde{g},
-    $$
-    where $\tilde{g}$ is an extension of the boundary function $g$ into the domain $\Omega$, i.e., $\tilde{g} \equiv g$ on $\partial\Omega$.
+\subsection{Decomposition of Solution}
+Assume that the solution $u$ can be written as:
+$$ u = u_0 +\tilde{g} $$
+where $u_0$ is the homogeneous component and $\tilde{g}$ is the particular solution. Note $\tilde{g} = g$ on $\partial\Omega.$
 
-    \item \textbf{Substitute into the Poisson Equation:}
-    Substituting $u = u_0 + \tilde{g}$ into equation \eqref{eq:poisson} yields:
-    $$
-    -\Delta (u_0 + \tilde{g}) = f.
-    $$
-    Simplifying, we obtain:
-    $$
-    -\Delta u_0 = f + \Delta \tilde{g}.
-    $$
-    
-    \item \textbf{Define the Homogeneous Sobolev Space:}
-    Introduce the Sobolev space with homogeneous boundary conditions:
-    $$
-    H^1_0(\Omega) = \left\{ v \in H^1(\Omega) \ \bigg| \ v = 0 \text{ on } \partial\Omega \right\}.
-    $$
-    
-    \item \textbf{Multiply by a Test Function and Integrate:}
-    Multiply both sides of the equation by a test function $v \in H^1_0(\Omega)$ and integrate over $\Omega$:
-    $$
-    \int_{\Omega} -\Delta u_0 v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx.
-    $$
-    
-    \item \textbf{Apply Integration by Parts:}
-    Using integration by parts, we have:
-    $$
-    \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx = \int_{\Omega} \left( f + \Delta \tilde{g} \right) v \, dx,
-    $$
-    where the boundary terms vanish since $v = 0$ on $\partial\Omega$.
-    
-    \item \textbf{Formulate the Variational Problem:}
-    The variational problem can now be stated as: Find $u_0 \in H^1_0(\Omega)$ such that
-    \begin{equation}
-        a(u_0, v) = (f + \Delta \tilde{g}, v) \quad \forall v \in H^1_0(\Omega),
-        \label{eq:variational}
-    \end{equation}
-    where
-    $$
-    a(u_0, v) = \int_{\Omega} \nabla u_0 \cdot \nabla v \, dx, \quad \text{and} \quad 
-    (f + \Delta \tilde{g}, v) = \int_{\Omega} (f + \Delta \tilde{g}) v \, dx.
-    $$
-\end{enumerate}
+This allows the Poisson problem to to be rewritten as:
+$$-\Delta u_0 = f + \Delta\tilde{g}$$
+
+\subsection{Using a Test Function}
+The test function $v \in H_0^1$ can be multiplied to both sides to give:
+$$ -\Delta u_0 v = (f+\Delta\tilde{g})$$
+Integrating this result over $\Omega$ gives:
+Which can be integrated and simplified to give the following variatial form:
+\begin{equation}
+    \int_{\Omega}-\Delta u_0v\,dx = \int_{\Omega}(f+\tilde{g})v\,dx \quad \forall v \in H_0^1(\Omega).
+\end{equation}
+This allows the Poisson problem be solved by finding $u_0.$
+
 
 \subsection{Existence and Uniqueness of the Solution}
 
@@ -119,10 +91,40 @@ To solve this fomulation of the Poisson a varitational form is used. First the
 
 \end{theorem} 
 
-\subsubsection{Application to the Poisson Problem}
-Given $H^1_0(\Omega)$ is a Hilbert space $u_0$ has a unique solution because:
+
+\section{Discrete Bilinear Forms}
+Now the following bilinear forms can be defined to approximate the variational form.
+
+\subsection{Local Bilinear Form}
+For each element $E_i$ of $\mathcal{T}_h,$ the local bilinear form $a^{E_i}: V_h^{E_h}\times V_h^{E_h} \rightarrow \mathbb{R}$ is defined by:
+$$
+a^{E_h}(u, v) = \int_{E_i} \nabla u \cdot \nabla v \, dx,
+$$
+
+
+\subsection{Global Bilinear Form}
+The global bilinear form can then given by
+$$
+a^h(u, v) = \sum_{E \in \mathcal{T}_h} a^E(u, v).
+$$
+
+\section{Existance and Uniqueness of the Variational Form}
+Given $H^1_0(\Omega)$ is a Hilbert space and the bilinear form derived earlier. The linear functional $L(v)$ is:
+$$L(v) - \int_{\Omega}(f-\Delta\tilde{g})v$$
+
+\subsection{Boundness of Bilinear Form}
+\begin{align*}
+    |a(u_0,v)| &= \left|\int_{\Omega}\nabla u_0 \cdot \nabla v\,dx\right|&\\ 
+    &\leq||u_0||_{L^2(\Omega)} ||v||_{L^2(\Omega)} \quad&\text{(By the Cauchy-Schwarz inequality)}\\
+    &\leq||u_0||_{H^1_0(\Omega)} ||v||_{H^1_0(\Omega)} \quad&\text{(By properties of)}
+\end{align*}
+
+\subsection{}
+
+
 \begin{itemize}
-    \item $|a(u_0,v)| \leq ||u_0||_{H^1_0(\Omega)} ||v||_{H^1_0(\Omega)} $ by the Cauchy-Schwarz inequality.\\
+    \item \mathbf
+    $|a(u_0,v)| = \left|\int_{\Omega}\nabla u_0 \cdot \nabla v\,dx \right|\leq ||u_0||_{H^1_0(\Omega)} ||v||_{H^1_0(\Omega)} $ by the Cauchy-Schwarz inequality.\\
     Hence $a(u_0,v)$ is bounded.
 
     \item $a(v,v) = \int_{\Omega}|\nabla v|^2\ dx = ||u_0||^2_{H_0^1(\Omega)} \geq ||\alpha||^2_{H_0^1(\Omega)}$,\\
@@ -131,16 +133,6 @@ Given $H^1_0(\Omega)$ is a Hilbert space $u_0$ has a unique solution because:
 
 Therefore there is a unique solution $L(v) = a(u_0,v) = \int_\Omega (f + \Delta\tilde{g})v\ dx$ by equation \eqref{eq:variational}\\
 $\qed$.
-
-\subsection{Discrete Bilinear Form}
-The local bilinear form $a^E: H^1(E) \times H^1(E) \rightarrow \mathbb{R}$ is defined by
-$$
-a^E(u, v) = \int_E \nabla u \cdot \nabla v \, dx,
-$$
-where $(\cdot, \cdot)_{0,E}$ denotes the $L^2$ inner product on the element $E$. The global bilinear form can then given by
-$$
-a^h(u, v) = \sum_{E \in \mathcal{T}_h} a^E(u, v).
-$$
 
 
 \subsection{Virtual Element Space}
