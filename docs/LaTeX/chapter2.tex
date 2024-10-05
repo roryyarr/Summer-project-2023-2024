@@ -10,12 +10,13 @@
 \section{Example Calculation}
 
 
-This section details a worked solution of the non-homogeneous Poisson problem on a simple mesh, to illustrate the Virtual Element Method.
+This section details a worked solution of the following non-homogeneous Poisson problem:
+\begin{align}
+    g &= 2\pi^2\sin(\pi x)\sin(\pi y)\\
+    f &= \sin(\pi x)\sin(\pi y)
+\end{align}
 
-$$\left\{\begin{array}{rl}
-    -\Delta u(x,y) &= 2\pi^2\sin(\pi x)\sin(\pi y)\\
-    u(x,y) &= \sin(\pi x)\sin(\pi y)
-\end{array}\right$$
+
 
 \subsection{Mesh Definition}
 

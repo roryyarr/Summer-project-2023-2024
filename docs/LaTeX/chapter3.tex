@@ -206,7 +206,16 @@ function vem(mesh::Mesh, rhs::Function, boundary_condition::Function)::Vector{Fl
 
 \section{plot\_solution}
 
-This module contains the plotting functions for this vem code. It contains a heatmap and a wireframe plot.
+This module contains the plotting functions for this vem code. It contains a heatmap and a wireframe plot. Each function has the following entries:
+\begin{itemize}
+    \item \texttt{mesh}: This is the mesh for the associated solution.
+    \item \texttt{solution}: This is the values of the vertices.
+    \item \texttt{ptitle}: This parameter allows the title of the plot to be specified.
+    \item \textt{axis\_labels}: This parameter allows the names of the axes to be specified.
+    \item \texttt{colourscheme}: This parameter specifies the colour scheme of the plot.
+    \item \texttt{show\_colourbar}: This parameter allows the colourbar to be turned of.
+    \item \texttt{savepath}: This parameter saves the plot under a given name.
+\end{itemize}
 
 \subsection{plot\_heatmap}
 Unlike MatLab Julia lacked a function similar to MatLabs Patches plotting function, so the elements has to be plotted separately using a loop structure. Where each element is its own unique plot.
@@ -317,7 +326,8 @@ end
 
 
 \section{vem\_solver}
-Lastly there is the file \texttt{vem\_solver.jl} that runs a command line version of the code. Which accepts a range of options shown in table \eqref{tab:vem_options}
+
+The last module is the command line code. Where the user runs the code from the command line. Which accepts a range of options shown in table \eqref{tab:vem_options}
 
 \begin{table}[ht]
     \centering
