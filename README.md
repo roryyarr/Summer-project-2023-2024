@@ -5,20 +5,12 @@ This repository contains the work I completed during my research scholarship at 
 ## Poison 
 This project solves the possion equation: 
 $ \begin{cases}
-    -\Delta{u} & = f \quad  \text{in}\ \ \Omega \\
+    -\Delta{u} & = f \quad  \text{in} \ \Omega \\
     u & = g \quad  \text{on}\ \delta\Omega
-\end{cases} $\\
+\end{cases} $
 
 Where $f,g \in L_2$
 
-## Directory Structure
-
-- **`check/`**: Contains debug statements and mesh files used in this project.
-- **`LaTeX/`**: Contains the paper I wrote for this project, including a detailed discussion of the methods and results.
-- **`src/`**: Contains a reimplementation of Oliver J. Sutton's *The Virtual Element Method in 50 Lines of MATLAB*, translated to Julia. The original MATLAB implementation is described in the following paper:
-  - Sutton, O.J. *The Virtual Element Method in 50 Lines of MATLAB*. Numer Algor 75, 1141–1159 (2017). [https://doi.org/10.1007/s11075-016-0235-3](https://doi.org/10.1007/s11075-016-0235-3)
-- **`docs/`**: Documentation for the project, generated using `Documenter.jl`. This includes details on how to use the Virtual Element Method implementation.
-- **`README.md`**: Describes the purpose and structure of this repository.
 
 ## Project Overview
 
@@ -27,6 +19,94 @@ The primary goal of this research project was to explore and implement numerical
 - A Julia reimplementation of the VEM as described by Oliver J. Sutton.
 - Supporting MATLAB files for additional analysis and comparison.
 - A paper discussing the project's objectives, methodology, and results.
+
+## Directory Structure
+
+Here’s a complete list of the files in this repository:
+
+### Main Files:
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `.gitignore`                      | Specifies files ignored by Git.                                               |
+| `Project.toml`                    | Julia project dependencies.                                                  |
+| `README.md`                       | This README file describing the repository structure.                        |
+
+### LaTeX Files:
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `LaTeX/README.md`                 | Documentation related to the LaTeX report.                                    |
+| `LaTeX/appendix.tex`              | Appendix with MATLAB and Julia code listings.                                |
+| `LaTeX/diagram.tex`               | Diagrams used in the LaTeX report.                                           |
+| `LaTeX/jlcode.sty`                | Custom Julia syntax highlighting for LaTeX.                                  |
+| `LaTeX/main.tex`                  | Main LaTeX document for the report.                                          |
+| `LaTeX/sources.bib`               | Bibliography file for references.                                            |
+| `LaTeX/vem-preamble.sty`          | Preamble for the LaTeX report including packages and settings.               |
+
+### MATLAB Files:
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `MATLAB/PolygonTests.m`           | MATLAB file containing tests for polygon meshes in the VEM context.          |
+
+### Source Code (Julia):
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `src/L_domain.jl`                 | Julia code for handling the L-shaped domain problem.                         |
+| `src/plot_solution.jl`            | Julia script to plot the solution to the VEM problem.                        |
+| `src/read_mat.jl`                 | Julia script for reading `.mat` files.                                       |
+| `src/square_domain.jl`            | Julia code for handling a square domain.                                     |
+| `src/vem_method.jl`               | Julia implementation of the VEM method.                                      |
+| `src/vem_problem.jl`              | Julia code defining the VEM problem struct.                                  |
+| `src/vem_solver.jl`               | Julia code to solve the VEM problem.                                         |
+
+### Check Directory:
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `check/debugging/output.txt`      | Debug output for tracking VEM computations.                                  |
+| `check/debugging/r.md`            | Markdown report for debugging information.                                   |
+| `check/debugging/vem_debug_output.md` | General debug output in Markdown format.                                 |
+| `check/debugging/vem_debug_output_julia.md` | Julia-specific debug output.                                   |
+| `check/debugging/vem_debug_output_matlab.md` | MATLAB-specific debug output.                                |
+| `check/meshes/*.mat`              | `.mat` files for different mesh configurations, including L-domain, Voronoi, etc. |
+
+### Documentation (`docs/`):
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `docs/build/index.html`           | HTML documentation generated with `Documenter.jl`.                           |
+| `docs/build/notebook.ipynb`       | Example Jupyter notebook.                                                    |
+| `docs/build/plot_solution/index.html` | Plot solution documentation in HTML format.                            |
+| `docs/src/*.md`                   | Markdown source files for the project documentation.                        |
+| `docs/make.jl`                    | Julia script to build the documentation using `Documenter.jl`.               |
+
+### Jupyter Notebooks:
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `nb/vem_demo.ipynb`               | Example Jupyter notebook demonstrating the VEM solver.                      |
+
+### Resources (`res/plots/`):
+| **File**                         | **Description**                                                              |
+|-----------------------------------|------------------------------------------------------------------------------|
+| `res/plots/something.pdf`         | Example plot in PDF format.                                                  |
+| `res/plots/something.png`         | Example plot in PNG format.                                                  |
+| `res/plots/something.svg`         | Example plot in SVG format.                                                  |
+
+
+### cc Dependencies
+
+The following Julia packages are required to run the Virtual Element Method solver and related scripts in this project:
+
+- **`Plots`**: For generating visualizations, such as heatmaps and wireframe plots.
+- **`Colors`**: Provides color manipulation and schemes for plotting.
+- **`Statistics`**: Used for basic statistical calculations.
+- **`MAT`**: For reading and writing MATLAB `.mat` files, which are used for storing VEM problem data.
+- **`LinearAlgebra`**: Provides linear algebra functions, necessary for matrix operations.
+- **`SparseArrays`**: Supports sparse matrix representations, essential for efficiently handling large systems.
+  
+To install these dependencies, run the following command in the Julia REPL:
+
+```julia
+using Pkg
+Pkg.add(["Plots", "Colors", "Statistics", "MAT", "LinearAlgebra", "SparseArrays"])
+
 
 
 ### Command Line Options 
